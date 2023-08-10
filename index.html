@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<!--
+    Plain-Academic by Vasilios Mavroudis
+    Released under the Simplified BSD License/FreeBSD (2-clause) License.
+    https://github.com/mavroudisv/plain-academic
+-->
+
+<html lang="en">
+
+<head>
+
+
+  <!doctype html>
+  <html lang="en" class="no-js">
+
+          <title>Fangxin Liu's Homepage</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <link rel="icon" href="dog 2.png" type="image/x-icon">
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+          <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+          <script src="https://kit.fontawesome.com/a24320d871.js" crossorigin="anonymous"></script>
+
+          <script
+            type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+
+          <!--start-smooth-scrolling-->
+          <script type="text/javascript" src="js/move-top.js"></script>
+          <script type="text/javascript" src="js/easing.js"></script>
+          <script type="text/javascript">
+            jQuery(document).ready(function ($) {
+              $(".scroll").click(function (event) {
+                event.preventDefault();
+                $('html,body').animate({ scrollTop: $(this.hash).offset().top }, 1000);
+              });
+            });
+          </script>
+
+
+          </head>
+          <style>
+            :root {
+              --primary-color: #1B6FC2;
+              --secondary-color: #536390;
+              --font-color: #23476A;
+              --bg-color: #d8e2dc;
+              --heading-color: #292922;
+            }
+
+            [data-theme="dark"] {
+              --primary-color: #66CCCC;
+              --secondary-color: #818cab;
+              --font-color: #CCCCCC;
+              --bg-color: #2C2C2C;
+              --heading-color: #818cab;
+            }
+
+            hr {
+              display: block;
+              margin-top: 2.5em;
+              margin-bottom: 0.5em;
+              margin-left: auto;
+              margin-right: auto;
+              border-style: inset;
+              border-width: .5px;
+            }
+
+            body {
+              background-color: var(--bg-color);
+              color: var(--font-color);
+            }
+
+            a {
+              color: var(--primary-color);
+            }
+
+            a:hover {
+              color: var(--primary-color);
+            }
+
+
+            .theme-switch {
+              display: inline-block;
+              top: 7px;
+              height: 27px;
+              right: 70px;
+              position: absolute;
+              width: 32px;
+            }
+
+            .theme-switch input {
+              display: none;
+            }
+
+            .slider {
+              background-color: #b3b3b3;
+              bottom: 0;
+              cursor: pointer;
+              left: 0;
+              position: absolute;
+              right: 0;
+              top: 12px;
+              transition: .4s;
+            }
+
+            .slider:before {
+              background-color: #FEFDF9;
+              top: 0;
+              content: "";
+              height: 15px;
+              left: 0px;
+              position: absolute;
+              transition: .4s;
+              width: 15px;
+            }
+
+            input:checked+.slider {
+              background-color: #66CCCC;
+            }
+
+            input:checked+.slider:before {
+              transform: translateX(17px);
+            }
+
+            .slider.round {
+              border-radius: 34px;
+            }
+
+            .slider.round:before {
+              border-radius: 50%;
+            }
+
+            .box {
+              max-height: 0;
+              overflow: hidden;
+            }
+
+            :checked~.box {
+              max-height: 666px;
+            }
+
+            input[type="checkbox"] {
+              display: none;
+            }
+
+            :checked~.check-in {
+              display: none;
+            }
+
+            :checked~.check-out {
+              display: inline-block;
+            }
+
+            .check-out {
+              display: none;
+            }
+
+            .check-in,
+            .check-out {
+              color: #34538b;
+              cursor: pointer;
+            }
+          </style>
+          </head>
+
+          <body>
+
+
+            <!-- Navigation -->
+            <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+              <div class="container">
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                    <!-- <span class="sr-only">Menu</span> -->
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                  <div class="menu">
+                    <ul class="nav navbar-nav">
+                      <li><a class="nav-item waves-effect waves-light active scroll" href="index.html">Home</a></li>
+                      <li><a class="nav-item waves-effect waves-light scroll" href="#research">Research</a></li>
+                      <li><a class="nav-item waves-effect waves-light scroll" href="#publication">Publication</a></li>
+                      <li><a class="nav-item waves-effect waves-light scroll" href="#blogs">Blog</a></li>
+                      <li><a class="nav-item waves-effect waves-light scroll" href="#news">News</a></li>
+                      <li><a class="nav-item waves-effect waves-light scroll" href="#projects">Project</a></li>
+                      <li><a href="./img/Wechat_QR_code.jpg" target="_blank">Wechat</a></li>
+                      <li><a href="#" target="_blank">CV</a></li>
+                    </ul>
+                  </div>
+
+
+
+                  <div class="theme-switch-wrapper">
+                    <label class="theme-switch" for="checkbox">
+                      <input type="checkbox" id="checkbox">
+                      <div class="slider round"></div>
+                    </label>
+                  </div>
+
+                </div>
+              </div>
+            </nav>
+
+            <div class="container">
+              <div class="row">
+                <!-- Entries Column -->
+                <div class="col-md-3">
+                  <!-- Contact Info on the Sidebar and image -->
+                  <div style="font-family: Arial, Helvetica, sans-serif; font-size: 27px;"><b>Fangxin Liu @ Leon</b>
+                  </div>
+                  <br>
+                  <img class="img-responsive" src="xinhuan.jpg" height="400" width="400" alt=""><br>
+                  <p>Assistant Professor<br>
+                    <a href="https://acalab.sjtu.edu.cn/">ACA Lab</a>, SEIEE<br>
+                    Shanghai Jiao Tong University<br>
+                  </p>
+                  <p>
+                    <b>Email:</b> <a href="mailto:liufangxin@sjtu.edu.cn">liufangxin@sjtu.edu.cn</a><br>
+                    <b>Wechat:</b> lfx920701<br>
+                    <b>Office:</b> SEIEE 3-125, SJTU
+                  </p>
+                  <p><a href="https://j.map.baidu.com/fc/Sil"><i class="fas fa-map-marked-alt"
+                        aria-hidden="true"></i></a> 800 DongChuan Road, SEIEE Building #03-125, Minhang District,
+                    Shanghai </p>
+                  <dd><a href="https://weibo.com/u/1314085552">Weibo</a></dd>
+                  <dd><a href="https://github.com/MXHX7199">Github</a></dd>
+                  <dd><a
+                      href="https://scholar.google.com/citations?hl=zh-TW&user=dXzsaIsAAAAJ&view_op=list_works&sortby=pubdate">Google
+                      Scholar</a></dd>
+                  <dd><a href="#">Twitter</a></dd>
+                  <dd><a href="#">LinkedIn</a></dd>
+
+                  <br>
+                  <p>
+                    <b>本站近期访问量: <br></b>
+
+                  <div class="text-center">
+                    <p style="width: 250px;">
+                      <!-- <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=cZgyhvWI7eq-9SnsSsJVkhMVioGtOr0YJqI3-Ejt9C8&cl=ffffff&w=a"></script> -->
+                      <script type="text/javascript" id="clustrmaps"
+                        src="//clustrmaps.com/map_v2.js?d=sNUIIgL1WU3gnVp7Lq7JpnhV-2YGPzHk9c4NSyeNuIc&cl=ffffff&w=a&t=tt"></script>
+                    </p>
+                  </div>
+                  </p>
+
+                  <br>
+                  <div>
+                    <p style="font-size: 16px;"">
+                    My Friends: 
+                </p>
+                    <p>
+                      <b><a href="https://zongwuwang.github.io/">Zongwu Wang (汪宗武)</a>:</b> My junior fellow studied
+                      under Prof. Jiang, PhD Student<br>
+                    </p>
+                    <p>
+                      <b><a href="https://home.epeenofront.com/">Haomin Li (李皓民)</a>:</b>  My junior fellow studied
+                      under Prof. Jiang, PhD Student<br>
+                      </p>
+                  </div>
+
+                </div>
+                <!-- main info -->
+                <div class="row">
+                  <div class="col-md-8">
+                    <div style="margin-top:5vh; text-align:justify;">
+                      <div style="text-align:left;">
+                        <div id="Aboutme" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;"><b>About
+                            me</b></div>
+                        <br>
+                        <p>
+                          Fangxin Liu is an Assistant Professor at Shanghai Jiao Tong University (SJTU), 
+                          specializing in neural network acceleration (e.g., neural network compression and SW/HW co-design.), in-memory computing, 
+                          and brain-inspired neuromorphic computing. 
+                        </p>
+                      <p>
+                          He obtained his Ph.D. Degree in Computer Science and Technology from Shanghai Jiao Tong University in 2023, 
+                          under the supervision of Prof. Li Jiang. You can find more information about Prof. Jiang <a href="https://www.cs.sjtu.edu.cn/~jiangli">here</a>.
+                          </p>
+                        <!-- <br>
+                        <HR> -->
+                        <p>The papers and related resources will be shared on my <a
+                            href="https://github.com/MXHX7199">Github</a> in the near future.</p>
+                      </div>
+                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+                      <div style="margin-top:3vh; text-align:left;">
+                        <div id="research" align="justify" ,
+                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                          <b>Research</b>
+                        </div>
+                        <p> Current research interests focuses on:
+                        <ul>
+                          <li>In-memory Computing (存内计算)</li>
+                          <li>Brain-inspired Neuromorphic Computing (神经模态计算)</li>
+                          <li>Neural Network Acceleration</li>
+                        </ul>
+                        </p>
+                      </div>
+
+                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+                      <div style="text-align:left;">
+                        <div id="news" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;"><b>What's
+                            News</b></div>
+                        <p><strong>Our paper "HyperAttack" has been accepted by DAC 2023!</strong></p>
+                        <p><small>Feb./24/2023</small></p>                        
+                        <p><strong>Our paper "SIMSnn" has been accepted by DATE 2023!</strong></p>
+                        <p><small>Nov./18/2022</small></p>
+                        <p><strong>I'm awarded National Scholarship again!</strong></p>
+                        <p><small>Sep./27/2022</small></p>
+                        <p><strong>Our paper "Randomize and Match" has been accepted by ICCD 2022!</strong></p>
+                        <p><small>Aug./22/2022</small></p>
+                        <p><strong>I'm awarded <a href="https://mp.weixin.qq.com/s/EaOkirKdjPmBtJ0R8CE0Xw">Spark
+                              Award</a> from HUAWEI!</strong></p>
+                        <p><small>Jul./29/2022</small></p>
+                        <p><strong>Fangxin Liu is invited to deliver a talk about SNNs at <a
+                              href="https://www.bilibili.com/video/BV1fr4y1s7dK">AI Time</a></strong></p>
+                        <p><small>May/25/2022</small></p>
+                        <p><strong>Our paper "SoBS-X" has been accepted by IEEE TCAD!</strong></p>
+                        <p><small>Apr./17/2022</small></p>
+                        <p><strong>Two papers have been accepted by ICMR 2022!</strong></p>
+                        <p><small>Apr./06/2022</small></p>
+                        <p><strong>Our paper "L3E-HD" has been accepted by SIGIR 2022!</strong></p>
+                        <p><small>Apr./01/2022</small></p>
+                        <p><strong>Our paper "IVQ" has been accepted by IEEE TCAD!</strong></p>
+                        <p><small>Feb./23/2022</small></p>
+                        <p><strong><a href="https://mp.weixin.qq.com/s/iueJ2QC4yxwEvXHT4q3K7g">Three papers</a> have
+                            been accepted by DAC 2022!</strong></p>
+                        <p><small>Feb./22/2022</small></p>
+                        <p><strong>Our paper has been selected by DATE 2022 as Best Paper in the T Track!</strong></p>
+                        <p><small>Feb./04/2022</small></p>
+                        <input id="check" type="checkbox">
+                        <div class="box">
+                          <p><strong>Our paper "DynSNN" has been accepted by ICASSP 2022!</strong></p>
+                          <p><small>Jan./21/2022</small></p>
+                          <p><strong>Our paper "SpikeConverter" has been accepted by AAAI 2022!</strong></p>
+                          <p><small>Dec./01/2021</small></p>
+                          <p><strong>Two papers have been accepted by DATE 2022!</strong></p>
+                          <p><small>Nov./11/2021</small></p>
+                          <p><strong>Our paper "SSTDP" has been accepted by Frontiers in Neuroscience!</strong></p>
+                          <p><small>Oct./01/2021</small></p>
+                          <p><strong>I'm awarded National Scholarship!</strong></p>
+                          <p><small>Sep./23/2021</small></p>
+                          <p><strong>Our paper "HAWIS" has been accepted by ASP-DAC 2022!</strong></p>
+                          <p><small>Sep./12/2021</small></p>
+                          <p><strong>Our paper "SME: ReRAM-based Sparse-Multiplication-Engine to Squeeze-Out Bit
+                              Sparsity of Neural Network" has been accepted by ICCD'21 !</strong></p>
+                          <p><small>Aug./20/2021</small></p>
+                          <p><strong>Our paper "Improving Neural Network Efficiency via Post-training Quantization with
+                              Adaptive Floating-Point" has been accepted by ICCV'21 !</strong></p>
+                          <p><small>Jul./23/2021</small></p>
+                          <p><strong>Our paper "Bit-Transformer: Transforming Bit-level Sparsity into Higher Preformance
+                              in ReRAM-based Accelerator" has been accepted by ICCAD'21 !</strong></p>
+                          <p><small>Jul./13/2021</small></p>
+                          <!-- <hr style="height:1px;border:none;border-top:1px solid #9d9d9d;" /> -->
+                          <p><strong>Our paper "IM3A: Boosting Deep Neural Network Efficiency via In-Memory
+                              Addressing-Assisted Acceleration" has been accepted by GLSVLSI'21 !</strong></p>
+                          <p><small>Apr./12/2021</small></p>
+                          <!-- <hr style="height:1px;border:none;border-top:1px solid #9d9d9d;" /> -->
+                          <p><strong>Our paper "PIMGCN: A ReRAM-based PIM Design for Graph Convolutional Network
+                              Acceleration" has been accepted by DAC'21 !</strong></p>
+                          <p><small>Feb./20/2021</small></p>
+                        </div>
+                        <label for="check" class="check-in">... See More</label>
+                        <label for="check" class="check-out" style="margin-top:3vh;">Folding ...</label>
+
+
+
+
+                      </div>
+                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+                      <div style="margin-top:3vh; text-align:left;">
+                        <div id="publication" align="justify" ,
+                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                          <b>Publication [<a
+                              href="https://scholar.google.com/citations?hl=zh-TW&user=dXzsaIsAAAAJ&view_op=list_works&sortby=pubdate">Google
+                              Citation</a>]</b>
+                        </div>
+                        <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "Randomize and Match: Exploiting Irregular Sparsity for
+                          Energy Efficient Processing in SNNs ." to appear in 40th IEEE International Conference on
+                          Computer Design&nbsp;(<font color="green">ICCD'22</font>). <strong>(Acceptance Rate:
+                            24%).</strong>
+                          <!-- [Link] [Code] [Preprint] [Slides] -->
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "SoBS-X: Squeeze-Out Bit Sparsity for
+                          ReRAM-Crossbar-Based Neural Network Accelerator.", IEEE Transactions on Computer Aided Design
+                          of Integrated Circuits and Systems (<font color="green">IEEE TCAD</font>), 2022. <strong>(CCF
+                            Tier A).</strong>
+                          <a href="https://ieeexplore.ieee.org/document/9769275">[Link]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "L3E-HD: A Framework Enabling Efficient Ensemble in
+                          High-Dimensional Space for Language Tasks.", to appear in 45th International ACM SIGIR
+                          Conference on Research and Development in Information Retrieval (<font color="green">SIGIR'22
+                          </font>). <strong>(Acceptance Rate: 24.7%).</strong>
+                          <a href="https://github.com/MXHX7199/SIGIR22-EnsembleHDC">[Code]</a> <a
+                            href="https://dl.acm.org/doi/abs/10.1145/3477495.3531761">[Link]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "IVQ: In-Memory Acceleration of DNN Inference
+                          Exploiting Varied Quantization.", IEEE Transactions on Computer Aided Design of Integrated
+                          Circuits and Systems (<font color="green">IEEE TCAD</font>), 2022. <strong>(CCF Tier
+                            A).</strong>
+                          <a href="https://ieeexplore.ieee.org/document/9724255">[Link]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "EBSP: Evolving Bit Sparsity Patterns for
+                          Hardware-Friendly Inference of Quantized Deep Neural Networks." to appear in 59th Design
+                          Automation Conference&nbsp;(<font color="green">DAC'22</font>). <strong>(Acceptance Rate:
+                            23%).</strong>
+                          <a href="https://dl.acm.org/doi/abs/10.1145/3489517.3530660">[Link]</a> <a
+                            href="./files/[DAC-2022]EBSP_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[DAC-2022]EBSP_slides.pdf">[Slides]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "SATO: Spiking Neural Network Acceleration via
+                          Temporal-Oriented Dataflow and Architecture." to appear in 59th Design Automation
+                          Conference&nbsp;(<font color="green">DAC'22</font>). <strong>(Acceptance Rate: 23%).</strong>
+                          <a href="https://dl.acm.org/doi/abs/10.1145/3489517.3530592">[Link]</a> <a
+                            href="./files/[DAC-2022]SATO_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[DAC-2022]SATO_slides.pdf">[Slides]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "PIM-DH: ReRAM-based Processing-in-Memory Architecture
+                          for Deep Hashing Acceleration." to appear in 59th Design Automation Conference&nbsp;(<font
+                            color="green">DAC'22</font>). <strong>(Acceptance Rate: 23%).</strong>
+                          <a href="https://dl.acm.org/doi/abs/10.1145/3489517.3530575">[Link]</a> <a
+                            href="./files/[DAC-2022]PIM-DH_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[DAC-2022]PIM-DH_slides.pdf">[Slides]</a>
+                          <!-- [Link] [Code] [Preprint] [Slides] -->
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "DynSNN: A Dynamic Approach to Reduce Redundancy in
+                          Spiking Neural Networks." to appear in 47th IEEE International Conference on Acoustics, Speech
+                          and Signal Processing&nbsp;(<font color="green">ICASSP'22</font>). <strong>(CCF Tier
+                            B).</strong>
+                          <a href="https://ieeexplore.ieee.org/abstract/document/9746566">[Link]</a> <a
+                            href="./files/[ICASSP-22]DynSNN_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[ICASSP-22]DynSNN_poster.pdf">[Poster]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "SpikeConverter: An Efficient Conversion Framework
+                          Zipping the Gap between Artificial Neural Networks and Spiking Neural Networks." to appear in
+                          36th AAAI Conference on Artificial Intelligence&nbsp;(<font color="green">AAAI'22</font>),
+                          2022. <strong>(Acceptance Rate: 15%).</strong> <strong>(<a
+                              href="https://aaai.org/Conferences/AAAI-22/wp-content/uploads/2022/02/AAAI-22-presenter-schedule.pdf">Oral</a>,
+                            top 5%).</strong>
+                          <a href="https://www.aaai.org/AAAI22Papers/AAAI-364.LiuF.pdf">[Link]</a> <a
+                            href="./files/[AAAI-22]SpikeConverter_poster.pdf">[Poster]</a> <a
+                            href="https://mp.weixin.qq.com/s/OZ-dsdwqGqUJWUqQretclQ">[News]</a> <a
+                            href="https://www.bilibili.com/video/BV1fr4y1s7dK">[Talk]</a>
+
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "SSTDP: Supervised Spike Timing Dependent Plasticity
+                          for Efficient Spiking Neural Network Training.", <font color="green">Frontiers in Neuroscience
+                          </font>, 15 (2021). <strong>(Impact Factor 4.2)</strong>
+                          <a href="https://www.frontiersin.org/articles/10.3389/fnins.2021.756876/full">[Link]</a> <a
+                            href="https://github.com/MXHX7199/SNN-SSTDP">[Code]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "SME: ReRAM-based Sparse-Multiplication-Engine to
+                          Squeeze-Out Bit Sparsity of Neural Network." In Proceedings of 39th IEEE International
+                          Conference on Computer Design 2021&nbsp;(<font color="green">ICCD'21</font>).
+                          <strong>(Acceptance Rate: 24.4%).</strong>
+                          <a href="https://ieeexplore.ieee.org/document/9643646">[Link]</a> <a
+                            href="./files/[ICCD-21]SME_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[ICCD-21]SME_slides.pdf">[Slides]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "Improving Neural Network Efficiency via Post-training
+                          Quantization with Adaptive Floating-Point." In Proceedings of International Conference on
+                          Computer Vision 2021&nbsp;(<font color="green">ICCV'21</font>). <strong>(Acceptance Rate:
+                            25.9%).</strong>
+                          <a
+                            href="https://openaccess.thecvf.com/content/ICCV2021/html/Liu_Improving_Neural_Network_Efficiency_via_Post-Training_Quantization_With_Adaptive_Floating-Point_ICCV_2021_paper.html">[Link]</a>
+                          <a href="https://github.com/MXHX7199/ICCV_2021_AFP">[Code]</a> <a
+                            href="./files/[ICCV-21]AFP_poster.pdf">[Poster]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "Bit-Transformer: Transforming Bit-level Sparsity into
+                          Higher Preformance in ReRAM-based Accelerator." In Proceedings of 40th IEEE/ACM International
+                          Conference on Computer-Aided Design&nbsp;(<font color="green">ICCAD'21</font>).
+                          <strong>(Acceptance Rate: 23.5%).</strong>
+                          <a href="https://ieeexplore.ieee.org/document/9643569">[Link]</a> <a
+                            href="./files/[ICCAD-21]Bit-Transformer_preprint.pdf">[Preprint]</a>
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "IM3A: Boosting Deep Neural Network Efficiency via
+                          In-Memory Addressing-Assisted Acceleration." In Proceedings of 31st Great Lakes Symposium on
+                          VLSI 2021&nbsp;(<font color="green">GLSVLSI'21</font>). <strong>(Acceptance Rate:
+                            24%).</strong>
+                          <a href="https://dl.acm.org/doi/abs/10.1145/3453688.3461491">[Link]</a>
+
+                          <br>
+                        <li><strong>Fangxin Liu</strong>, et al. "AUSN: Approximately Uniform Quantization by Adaptively
+                          Superimposing Non-uniform Distribution for Deep Neural Networks." CoRR abs/2007.03903 (2020).
+                          <a href="#">[Link]</a>
+
+                          <br>
+                        <li>Yongbiao Chen, <strong>Fangxin Liu</strong>, et al. "TransHash: Transformer-based Hamming
+                          Hashing for Efficient Image Retrieval." to appear in ACM International Conference on
+                          Multimedia Retrieval 2022&nbsp;(<font color="green">ICMR'22</font>). <strong>(Acceptance Rate:
+                            30%)</strong>.
+                          <a href="https://dl.acm.org/doi/abs/10.1145/3512527.3531405">[Link]</a> <a
+                            href="https://arxiv.org/abs/2105.01823">[Preprint]</a>
+                          <br>
+                        <li>Yongbiao Chen, <strong>Fangxin Liu</strong>, et al. "Supervised Contrastive Vehicle
+                          Quantization for Efficient Vehicle Retrieval." to appear in ACM International Conference on
+                          Multimedia Retrieval 2022&nbsp;(<font color="green">ICMR'22</font>). <strong>(Acceptance Rate:
+                            30%)</strong>.
+                          <a href="https://dl.acm.org/doi/abs/10.1145/3512527.3531432">[Link]</a>
+                          <!-- <br>
+                        <li>Tao Yang, <strong>Fangxin Liu</strong>, et al. "BISWSRBS: A Winograd-based CNN Accelerator with a Fine-grained Regular Sparsity Pattern and Mixed Precision Quantization." ACM Transactions on Reconfigurable Technology and Systems (TRETS'21).
+                          [Slides] <a href="#">[Link]</a> [Code] -->
+                          <br>
+                        <li>Zongwu Wang, <strong>Fangxin Liu</strong>, et al. "Self-Terminated Write of Multi-Level Cell
+                          ReRAM for Efficient Neuromorphic Computing." to appear in 25th Design, Automation and Test in
+                          Europe Conference&nbsp;(<font color="green">DATE'22</font>). <strong>(Best Paper
+                            Award)</strong>.
+                          <a href="#">[Link]</a> <a href="./files/[DATE-22]STW_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[DATE-22]STW_slides.pdf">[Slides]</a>
+
+                          <br>
+                        <li>Tao Yang, <strong>Fangxin Liu</strong>, et al. "DTQAtten: Leveraging Dynamic Token-based
+                          Quantization for Efficient Attention Architecture." to appear in 25th Design, Automation and
+                          Test in Europe Conference&nbsp;(<font color="green">DATE'22</font>). <strong>(nominated for
+                            best paper award)</strong>.
+                          <a href="#">[Link]</a> <a href="./files/[DATE-22]DTQAtten_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[DATE-22]DTQAtten_slides.pdf">[Slides]</a>
+
+                          <br>
+                        <li>Qidong Tang, <strong>Fangxin Liu</strong>, et al. "HAWIS: Hardware-Aware Automated WIdth
+                          Search for Accurate, Energy-Efficient and Robust Binary Neural Network on ReRAM Dot-Product
+                          Engine." In Proceeding of 27th Asia and South Pacific Design Automation Conference&nbsp;(<font
+                            color="green">ASP-DAC'22</font>). <strong>(Acceptance Rate: 36.5%)</strong>.
+                          <a href="https://ieeexplore.ieee.org/abstract/document/9712542">[Link]</a> <a
+                            href="./files/[ASPDAC-22]HAWIS_preprint.pdf">[Preprint]</a> <a
+                            href="./files/[ASPDAC-22]HAWIS_slides.pdf">[Slides]</a>
+
+                          <br>
+                        <li>Tao Yang, <strong>Fangxin Liu</strong>, et al. "PIMGCN: A ReRAM-based PIM Design for Graph
+                          Convolutional Network Acceleration." In Proceeding of Design Automation Conference &nbsp;(
+                          <font color="green">DAC'21</font>).
+                          <a href="https://ieeexplore.ieee.org/abstract/document/9586231">[Link]</a>
+
+
+
+                          <!-- <p><strong>[CCF-A]</strong> Tao Yang, <strong>Fangxin Liu</strong>, et al. "PIMGCN: A ReRAM-based PIM Design for Graph Convolutional Network Acceleration." In Proceeding of Design Automation Conference (DAC’21).
+                          [Slides] <a href="http://www.w3school.com.cn/">[Link]</a> [Code]
+                        </p> --> <br>
+                        </li>
+                      </div>
+                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+                      <div style="margin-top:3vh; text-align:left;">
+                        <div id="awards" align="justify" ,
+                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                          <b>Awards</b>
+                        </div>
+                        <br>
+                        <li>National Scholarship, 2022.
+                        </li>
+                        <li>National Scholarship, 2021.
+                        </li>
+                        <li>Wu Wen Jun Honorary Doctoral Scholarship, 2021.
+                        </li>
+                        <li>Best Paper Award from DATE, 2022.
+                        </li>
+                        <li>Spark Award from HUAWEI, 2022.
+                      </div>
+
+                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+                      <div style="margin-top:3vh; text-align:left;">
+                        <div id="academic" align="justify" ,
+                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                          <b>Academic Activities</b>
+                        </div>
+                        <br>
+                        <h5>Conference Reviewers</h5>
+                        <ul>
+                          <li> AAAI Conference on Artificial Intelligence (AAAI), 2023</li>
+                          <li> Great Lakes Symposium on VLSI (GLSVLSI), 2022</li>
+                          <li> Design Automation Conference (DAC), 2022</li>
+                          <li> Great Lakes Symposium on VLSI (GLSVLSI), 2021</li>
+                        </ul>
+                      </div>
+
+                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+                      <div style="margin-top:3vh; text-align:left;">
+                        <div id="blogs" align="justify" ,
+                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                          <b>Blog</b>
+                        </div>
+                        <br>
+                        <li><a href="https://github.com/MXHX7199/SearchPaper">Let's read some awesome Quantization / PIM
+                            / DeepHash papers.</a>
+                        </li>
+                      </div>
+
+                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+                      <div style="margin-top:3vh; text-align:left;">
+                        <div id="projects" align="justify" ,
+                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                          <h3 class="title"><strong>Selected Projects</strong></h3>
+                        </div>
+                        <br>
+                        <!-- <li><strong>[NEURO-MIMETIC LEARNING ALGORITHMS]</strong>: I am currently creating a neuron-mimetic learning framework, dedicated to serving better accuracy and inference efficiency.
+                          </li>
+                          <p align="right">
+                            <small><a href="#"> … see more</a></small></p> -->
+                        <table width="100%" align="center" border="0" cellpadding="20">
+                          <tbody>
+                            <tr>
+                              <td width="25%"><img class="rounded shadow media-img ml-4" src="img/SNN.png" width="223"
+                                  height="160"></td>
+                              <td width="73%" valign="top">
+                                <p>
+                                  <a href=""><strong>Compression and acceleration on Neuromorphic Computing</strong></a>
+                                  <br>
+                                  <!-- <strong>SJTU</strong>, ACA Lab <a href="">XXX</a>, Sept. 2023 - July 2024 <br> -->
+                                </p>
+                                <p><br>
+                                  Brain-inspired neuromorphic computing aims to understand the cognitive mechanisms of a
+                                  brain and apply them to advance various areas in computer science. Recently, extensive
+                                  efforts have been attracted by spiking neural networks (SNNs) due to their low-power
+                                  and biologically plausible nature. Despite the potential benefits of supporting SNNs,
+                                  existing works fail to efficiently support them due to their software-based frameworks
+                                  or hardware-based but time-driven execution mechanisms.
+                                  I am currently designing a SW/HW co-design framework, dedicated to serving better
+                                  accuracy and inference efficiency.
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <HR>
+
+                        <table width="100%" align="center" border="0" cellpadding="20">
+                          <tbody>
+                            <tr>
+                              <td width="25%"><img class="rounded shadow media-img ml-4" src="img/LLM.png" width="223"
+                                  height="160"></td>
+                              <td width="73%" valign="top">
+                                <p>
+                                  <a href=""><strong>Compression and acceleration on Large-Scale Models</strong></a>
+                                  <br>
+                                  <!-- <strong>SJTU</strong>, ACA Lab <a href="">XXX</a>, Sept. 2023 - July 2024 <br> -->
+                                </p>
+                                <p><br>
+                                  Nowadays, model sizes keep increasing too large to be stored on a single gas pedal;
+                                  for instance, 175 billion parameters of GPT-3 require 350Gib of main memory if stored
+                                  parameters with 16-bit. In addition, the memory required for activation, gradients,
+                                  etc. during training is at least three times the model memory requirement. When the
+                                  large-scale model (e.g., foundation model and LLM) is deployed in practice, the model
+                                  is fine-tuned to generalize to specific downstream tasks using different data
+                                  depending on the downstream tasks.
+                                  I am currently designing a SW/HW co-design framework, dedicated to optimize storage
+                                  and execution efficiency.
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <HR>
+
+                        <table width="100%" align="center" border="0" cellpadding="20">
+                          <tbody>
+                            <tr>
+                              <td width="25%"><img class="rounded shadow media-img ml-4" src="img/database.jpg"
+                                  width="223" height="180"></td>
+                              <td width="73%" valign="top">
+                                <p>
+                                  <a href=""><strong>Compression and acceleration on Databases</strong></a>
+                                  <br>
+                                  <!-- <strong>SJTU</strong>, ACA Lab <a href="">XXX</a>, Sept. 2023 - July 2024 <br> -->
+                                </p>
+                                <p><br>
+                                  A pressing demand emerges for storing extremely large-scale high-dimensional data
+                                  generated by industry and academia at an increasing speed. Data compression techniques
+                                  can lower expenses and save storage maintenance efforts.
+                                  I am currently trying to compress high-dimensional data with an efficient store and
+                                  query engine. </p>
+                                <p></p>
+                                <p></p>
+                                <p></p>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+
+                        </tbody>
+                        </table>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+                <hr style="height:2px;border:none;border-top:2px solid #555555;" />
+
+
+
+                <!--  <div id="footer" class="panel">
+      <div class="panel-footer">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="text-center">
+              <p style="width: 250px;">
+                <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=sNUIIgL1WU3gnVp7Lq7JpnhV-2YGPzHk9c4NSyeNuIc&cl=ffffff&w=a"></script>
+              </p>
+            </div>
+          </div>
+        
+          <div class="col-sm-4">
+            <p>Links</p>
+            <ul class="list-unstyled">
+              <li><a href="https://acalab.sjtu.edu.cn/">ACALab</a></li>
+            </ul>
+          </div>
+    
+          <div class="col-sm-4">
+            <p>Contact</p>
+            <p><a href="mailto:liufangxin@sjtu.edu.cn"><i class="fas fa-paper-plane"></i></a> liufangxin at sjtu dot edu dot cn</p>
+            <p><a href="https://j.map.baidu.com/fc/Sil"><i class="fas fa-map-marked-alt"></i></a> 800 DongChuan Road, SEIEE Building #03-125, Minhang District, Shanghai  </p>
+          </div>
+        </div>  
+
+
+        <div class="row mt-3">
+          <p style="font-size:0.8em; float:right; color:#b5bec9;">
+            Thanks to <u> <a style="color:#b5bec9" target="_blank" href="https://mavroud.is/">Vasilios Mavroudis</a></u> for the <u><a style="color:#b5bec9" target="_blank" href="https://github.com/mavroudisv/plain-academic">template</a></u>!
+          
+          </p>
+        </div>
+    
+        <div>
+          <p class="text-center">
+            <img src="SJTU_logo_red.png"
+            style="max-width: 275px;float:rigleftht;"><img src="acalab.png"
+            style="max-width: 310px;float:rigleftht;">
+          </p>
+        </div>
+    
+      </div>
+      </div>
+    </div> -->
+
+
+                <div>
+                  <p class="text-center">
+                    <img src="SJTU_logo_red.png" style="max-width: 275px;float:rigleftht;"><img src="acalab.png"
+                      style="max-width: 310px;float:rigleftht;">
+                  </p>
+                </div>
+
+                <div>
+                  <p style="font-size:0.8em; float:right; color:#b5bec9;"> Thanks to <u> <a style="color:#b5bec9"
+                        target="_blank" href="https://mavroud.is/">Vasilios Mavroudis</a></u> for the <u><a
+                        style="color:#b5bec9" target="_blank"
+                        href="https://github.com/mavroudisv/plain-academic">template</a></u>!</p>
+                </div>
+                <!-- <script src="http://jerry-cdn.b0.upaiyun.com/hit-kounter/hit-kounter-0.1.1.js"></script>
+  <span>本站总访问量 <span data-hk-page="current"> - </span>次</span> -->
+                <script>
+                  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+
+                  function switchTheme(e) {
+                    if (e.target.checked) {
+                      document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                      document.documentElement.setAttribute('data-theme', 'light');
+                    }
+                  }
+
+                  toggleSwitch.addEventListener('change', switchTheme, true);
+
+                  function switchTheme(e) {
+                    if (e.target.checked) {
+                      document.documentElement.setAttribute('data-theme', 'dark');
+                      localStorage.setItem('theme', 'dark'); //add this
+                    } else {
+                      document.documentElement.setAttribute('data-theme', 'light');
+                      localStorage.setItem('theme', 'light'); //add this
+                    }
+                  }
+
+
+                  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+                  if (currentTheme) {
+                    document.documentElement.setAttribute('data-theme', currentTheme);
+
+                    if (currentTheme === 'dark') {
+                      toggleSwitch.checked = true;
+                    }
+                  }
+                </script>
+
+          </body>
+
+</html>
