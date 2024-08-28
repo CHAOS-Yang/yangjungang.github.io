@@ -1,485 +1,221 @@
 <!DOCTYPE html>
-<!--
-    Plain-Academic by Vasilios Mavroudis
-    Released under the Simplified BSD License/FreeBSD (2-clause) License.
-    https://github.com/mavroudisv/plain-academic
--->
-
 <html lang="en">
-
 <head>
+    <title>Jungang Yang's Homepage</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #1B6FC2;
+            --font-color: #000000;
+            --bg-color: #f0ecf0;
+            --heading-color: #292922;
+        }
 
+        [data-theme="dark"] {
+            --primary-color: #5ef2f2;
+            --font-color: #e7e7e8;
+            --bg-color: #352c2c;
+            --heading-color: #818cab;
+        }
 
-  <!doctype html>
-  <html lang="en" class="no-js">
+        body {
+            background-color: var(--bg-color);
+            color: var(--font-color);
+        }
 
-          <title>Jungang Yang's Homepage</title>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <!-- <link rel="icon" href="dog 2.png" type="image/x-icon"> -->
-          <!-- <link rel="stylesheet" type="text/css" href="css/style.css"> -->
-          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        a {
+            color: var(--primary-color);
+        }
 
+        hr {
+            margin-top: 2.5em;
+            margin-bottom: 0.5em;
+            border-style: inset;
+            border-width: .5px;
+        }
 
-          </head>
-          <style>
-            :root {
-              --primary-color: #1B6FC2;
-              --secondary-color: #536390;
-              --font-color: #000000;
-              --bg-color: #f0ecf0;
-              --heading-color: #292922;
-            }
+        .theme-switch {
+            display: inline-block;
+            height: 27px;
+            position: absolute;
+            width: 32px;
+            right: 70px;
+            top: 7px;
+        }
 
-            [data-theme="dark"] {
-              --primary-color: #5ef2f2;
-              --secondary-color: #2da11e;
-              --font-color: #e7e7e8;
-              --bg-color: #352c2c;
-              --heading-color: #818cab;
-            }
+        .theme-switch input {
+            display: none;
+        }
 
-            hr {
-              display: block;
-              margin-top: 2.5em;
-              margin-bottom: 0.5em;
-              margin-left: auto;
-              margin-right: auto;
-              border-style: inset;
-              border-width: .5px;
-            }
+        .slider {
+            background-color: #b3b3b3;
+            cursor: pointer;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 12px;
+            transition: .4s;
+        }
 
-            body {
-              background-color: var(--bg-color);
-              color: var(--font-color);
-            }
+        .slider:before {
+            background-color: #FEFDF9;
+            content: "";
+            height: 15px;
+            left: 0px;
+            position: absolute;
+            top: 0;
+            transition: .4s;
+            width: 15px;
+        }
 
-            a {
-              color: var(--primary-color);
-            }
+        input:checked + .slider {
+            background-color: #dcd3ea;
+        }
 
-            a:hover {
-              color: var(--primary-color);
-            }
+        input:checked + .slider:before {
+            transform: translateX(17px);
+        }
 
+        .slider.round {
+            border-radius: 34px;
+        }
 
-            .theme-switch {
-              display: inline-block;
-              top: 7px;
-              height: 27px;
-              right: 70px;
-              position: absolute;
-              width: 32px;
-            }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
 
-            .theme-switch input {
-              display: none;
-            }
-
-            .slider {
-              background-color: #b3b3b3;
-              bottom: 0;
-              cursor: pointer;
-              left: 0;
-              position: absolute;
-              right: 0;
-              top: 12px;
-              transition: .4s;
-            }
-
-            .slider:before {
-              background-color: #FEFDF9;
-              top: 0;
-              content: "";
-              height: 15px;
-              left: 0px;
-              position: absolute;
-              transition: .4s;
-              width: 15px;
-            }
-
-            input:checked+.slider {
-              background-color: #dcd3ea;
-            }
-
-            input:checked+.slider:before {
-              transform: translateX(17px);
-            }
-
-            .slider.round {
-              border-radius: 34px;
-            }
-
-            .slider.round:before {
-              border-radius: 50%;
-            }
-
-            .box {
-              max-height: 0;
-              overflow: hidden;
-            }
-
-            :checked~.box {
-              max-height: 666px;
-            }
-
-            input[type="checkbox"] {
-              display: none;
-            }
-
-            :checked~.check-in {
-              display: none;
-            }
-
-            :checked~.check-out {
-              display: inline-block;
-            }
-
-            .check-out {
-              display: none;
-            }
-
-            .check-in,
-            .check-out {
-              color: #34538b;
-              cursor: pointer;
-            }
-          </style>
-          </head>
-
-          <body>
-
-
-            <!-- Navigation -->
-            <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
-              <div class="container">
-                <div class="navbar-header">
-                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1">
-                    <!-- <span class="sr-only">Menu</span> -->
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-static-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-menu">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
-                  </button>
-                </div>
-
-                <!-- Collect the nav links, forms, and other content for toggling -->
-                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                  <div class="menu">
-                    <ul class="nav navbar-nav">
-                      <li><a class="nav-item waves-effect waves-light active scroll" href="index.html">Home</a></li>
-                      <li><a class="nav-item waves-effect waves-light scroll" href="#research">Research</a></li>
-                      <li><a class="nav-item waves-effect waves-light scroll" href="#publication">Publication</a></li>
-                      <!-- <li><a class="nav-item waves-effect waves-light scroll" href="#blogs">Blog</a></li>
-                      <li><a class="nav-item waves-effect waves-light scroll" href="#news">News</a></li> -->
-                      <li><a class="nav-item waves-effect waves-light scroll" href="#projects">Project</a></li>
-                      <li><a href="./img/Wechat_QR_code.jpg" target="_blank">Wechat</a></li>
-                      <li><a href="./files/cv.pdf" target="_blank">CV</a></li>
-                    </ul>
-                  </div>
-
-
-
-                  <div class="theme-switch-wrapper">
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <ul class="nav navbar-nav">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="#research">Research</a></li>
+                    <li><a href="#publication">Publication</a></li>
+                    <li><a href="#projects">Project</a></li>
+                    <li><a href="./img/Wechat_QR_code.jpg" target="_blank">Wechat</a></li>
+                    <li><a href="./files/cv.pdf" target="_blank">CV</a></li>
+                </ul>
+                <div class="theme-switch-wrapper">
                     <label class="theme-switch" for="checkbox">
-                      <input type="checkbox" id="checkbox">
-                      <div class="slider round"></div>
+                        <input type="checkbox" id="checkbox">
+                        <div class="slider round"></div>
                     </label>
-                  </div>
-
                 </div>
-              </div>
-            </nav>
+            </div>
+        </div>
+    </nav>
 
-            <div class="container">
-              <div class="row">
-                <!-- Entries Column -->
-                <div class="col-md-3">
-                  <!-- Contact Info on the Sidebar and image -->
-                  <div style="font-family: Arial, Helvetica, sans-serif; font-size: 27px;"><b>Jungang Yang</b>
-                  </div>
-                  <br>
-                  <img class="img-responsive" src="img/WechatIMG42270.jpeg" height="400" width="400" alt=""><br>
-                  <p>PhD Student<br>
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3">
+                <div style="font-family: Arial, Helvetica, sans-serif; font-size: 27px;"><b>Jungang Yang</b></div>
+                <br>
+                <img class="img-responsive" src="img/WechatIMG42270.jpeg" height="400" width="400" alt=""><br>
+                <p>PhD Student<br>
                     <a href="http://iiot.sjtu.edu.cn/#/">IIOT Lab</a>, SEIEE<br>
                     Shanghai Jiao Tong University<br>
-                  </p>
-                  <p>
+                </p>
+                <p>
                     <b>Email:</b> <a href="mailto:yangjungang@sjtu.edu.cn">yangjungang@sjtu.edu.cn</a><br>
                     <b>Wechat:</b> yangjungang2012<br>
-                  </p>
-                  <p><a href="https://j.map.baidu.com/fc/Sil"><i class="fas fa-map-marked-alt"
-                        aria-hidden="true"></i></a> 800 DongChuan Road, SEIEE Building, Minhang District,
-                    Shanghai </p>
-                  <!-- <dd><a href="https://weibo.com/u/1314085552">Weibo</a></dd> -->
-                  <!-- <dd><a href="https://github.com/MXHX7199">Github</a></dd> -->
-                  <dd><a
-                      href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en">Google
-                      Scholar</a></dd>
-                  <dd><a href="#">Twitter</a></dd>
-                  <dd><a href="#">LinkedIn</a></dd>
-
-                  <!-- <br>
-                  <p>
-                    <b>本站近期访问量: <br></b>
-
-                  <div class="text-center">
-                    <p style="width: 250px;">
-                      <script type="text/javascript" id="clustrmaps"
-                        src="//clustrmaps.com/map_v2.js?d=sNUIIgL1WU3gnVp7Lq7JpnhV-2YGPzHk9c4NSyeNuIc&cl=ffffff&w=a&t=tt"></script>
-                    </p>
-                  </div>
-                  </p> -->
-
-                  <br>
-                  <div>
-                    <p style="font-size: 16px;"">
-                    My Friends: 
                 </p>
-                    <p>
-                      <b><a href="https://mxhx7199.github.io">Fangxin Liu (刘方鑫)</a>:</b> Assistant Professor
-                      ACA Lab, SEIEE
-                      Shanghai Jiao Tong University<br>
-                    </p>
-                  </div>
-
-                </div>
-                <!-- main info -->
-                <div class="row">
-                  <div class="col-md-8">
-                    <div style="margin-top:5vh; text-align:justify;">
-                      <div style="text-align:left;">
-                        <div id="Aboutme" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;"><b>About
-                            me</b></div>
-                        <br>
-                        <p>
-                          Jungang Yang is currently pursuing the Ph.D. degree in computer science, Shanghai Jiao Tong University(SJTU), under the supervision of Prof. Liyao Xiang. You can find more information about Prof. Xiang <a href="https://xiangliyao.cn">here</a>.
-                          specializing in differential privacy, Adversarial learning and Federated Learning. 
-                        </p>
-                      <p>
-                          He received the Bachelor's degree in Information and Computing Science from Nanjing University, Nanjing,  China, in 2019.
-                          </p>
-                        <!-- <br>
-                        <HR> -->
-                        <!-- <p>The papers and related resources will be shared on my <a -->
-                            <!-- href="https://github.com/MXHX7199">Github</a> in the near future.</p> -->
-                      </div>
-                      <hr style="height:2px;border:none;border-top:2px solid #000000;" />
-                      <div style="margin-top:3vh; text-align:left;">
-                        <div id="research" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Research</b>
-                        </div>
-                        <p> Current research interests focuses on:
-                        <ul>
-                          <li>Differential privacy (差分隐私)</li>
-                          <li>Adversarial learning(强化学习)</li>
-                          <li>Federated Learning(联邦学习)</li>
-                        </ul>
-                        </p>
-                      </div>
-
-
-
-
-                      </div>
-                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
-                      <div style="margin-top:3vh; text-align:left;">
-                        <div id="publication" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Publication [<a
-                              href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en">Google
-                              Citation</a>]</b>
-                        </div>
-
-                        <br>
-                        <li><strong>Jungang Yang</strong>; Liyao Xiang; Pengzhi Chu; Xinbing Wang; Chenghu Zhou; "Certified Distributional Robustness on Smoothed Classifiers," in IEEE Transactions on Dependable and Secure Computing (TDSC), Digital Object Identifier: 10.1109/TDSC.2023.3264850, 2023. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/10093123">[Link]</a>
-
-                        <br>
-                        <li><strong>Jungang Yang</strong>; Liyao Xiang; Ruidong Chen; Weiting Li; Baochun Li; "Differential Privacy for Tensor-Valued Queries," in IEEE Transactions on Information Forensics & Security (TIFS), Digital Object Identifier: 10.1109/TIFS.2021.3089884, 2021. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/9456908">[Link]</a> 
-
-                        <br>
-                        <li><strong>Jungang Yang</strong>;  Liyao Xiang; Jiahao Yu; Xinbing Wang; Bin Guo; Zhetao Li; Baochun Li; "Matrix Gaussian Mechanisms for Differentially-Private Learning," in IEEE Transactions on Mobile Computing (TMC), Digital Object Identifier: 10.1109/TMC.2021.3093316, 2021. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/9475590">[Link]</a> 
-
-                        <br>
-                        <li>Liyao Xiang*;Weiting Li; <strong>Jungang Yang</strong>; Xinbing Wang; Baochun Li; ‘‘Differentially-Private Deep Learning with Directional Noise," in IEEE Transactions on Mobile Computing (TMC), 2021. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/9456908">[Link]</a> 
-
-
-                        </p>
-                        </li>
-                      </div>
-                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
-                      <!-- <div style="margin-top:3vh; text-align:left;">
-                        <div id="awards" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Awards</b>
-                        </div>
-                        <br>
-                        <li>National Scholarship, 2022.
-                        </li>
-                        <li>National Scholarship, 2021.
-                        </li>
-                        <li>Wu Wen Jun Honorary Doctoral Scholarship, 2021.
-                        </li>
-                        <li>Best Paper Award from DATE, 2022.
-                        </li>
-                        <li>Spark Award from HUAWEI, 2022.
-                      </div> -->
-
-                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
-                      <div style="margin-top:3vh; text-align:left;">
-                        <div id="academic" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Academic Activities</b>
-                        </div>
-                        <br>
-                        <h5>Conference Reviewers</h5>
-                        <ul>
-                          <li> Proc. IEEE International Conference on Computer Communications (INFOCOM)</li>
-                          <li> Transactions on Sensor Networks (TOSN)</li>
-                          <li> IEEE Transactions on Information Forensics & Security (TIFS)</li>
-                          <li> IEEE Transactions on Dependable and Secure Computing (TDSC)</li>
-                        </ul>
-                      </div>
-
-                        <HR>
-
-
-
-                        </tbody>
-                        </table> 
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-
-
-                <hr style="height:2px;border:none;border-top:2px solid #555555;" />
-
-
-
-                <!--  <div id="footer" class="panel">
-      <div class="panel-footer">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-sm-4">
-            <div class="text-center">
-              <p style="width: 250px;">
-                <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=sNUIIgL1WU3gnVp7Lq7JpnhV-2YGPzHk9c4NSyeNuIc&cl=ffffff&w=a"></script>
-              </p>
+                <p><a href="https://j.map.baidu.com/fc/Sil"><i class="fas fa-map-marked-alt" aria-hidden="true"></i></a> 800 DongChuan Road, SEIEE Building, Minhang District, Shanghai </p>
+                <dd><a href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en">Google Scholar</a></dd>
+                <dd><a href="#">Twitter</a></dd>
+                <dd><a href="#">LinkedIn</a></dd>
             </div>
-          </div>
-        
-          <div class="col-sm-4">
-            <p>Links</p>
-            <ul class="list-unstyled">
-              <li><a href="https://acalab.sjtu.edu.cn/">ACALab</a></li>
-            </ul>
-          </div>
-    
-          <div class="col-sm-4">
-            <p>Contact</p>
-            <p><a href="mailto:liufangxin@sjtu.edu.cn"><i class="fas fa-paper-plane"></i></a> liufangxin at sjtu dot edu dot cn</p>
-            <p><a href="https://j.map.baidu.com/fc/Sil"><i class="fas fa-map-marked-alt"></i></a> 800 DongChuan Road, SEIEE Building #03-125, Minhang District, Shanghai  </p>
-          </div>
-        </div>  
 
+            <!-- Main Content -->
+            <div class="col-md-8">
+                <div style="margin-top:5vh; text-align:justify;">
+                    <div id="Aboutme" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;"><b>About me</b></div>
+                    <br>
+                    <p>
+                        Jungang Yang is currently pursuing the Ph.D. degree in computer science at Shanghai Jiao Tong University (SJTU), under the supervision of Prof. Liyao Xiang. You can find more information about Prof. Xiang <a href="https://xiangliyao.cn">here</a>. His research focuses on differential privacy, adversarial learning, and federated learning.
+                    </p>
+                    <p>
+                        He received his Bachelor's degree in Information and Computing Science from Nanjing University, China, in 2019.
+                    </p>
+                    <hr style="height:2px;border:none;border-top:2px solid #000000;">
+                    
+                    <div id="research" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;"><b>Research</b></div>
+                    <p> Current research interests focus on:
+                    <ul>
+                        <li>Differential privacy (差分隐私)</li>
+                        <li>Adversarial learning (强化学习)</li>
+                        <li>Federated Learning (联邦学习)</li>
+                    </ul>
+                    </p>
+                    <hr style="height:2px;border:none;border-top:2px solid #555555;">
 
-        <div class="row mt-3">
-          <p style="font-size:0.8em; float:right; color:#b5bec9;">
-            Thanks to <u> <a style="color:#b5bec9" target="_blank" href="https://mavroud.is/">Vasilios Mavroudis</a></u> for the <u><a style="color:#b5bec9" target="_blank" href="https://github.com/mavroudisv/plain-academic">template</a></u>!
-          
-          </p>
-        </div>
-    
-        <div>
-          <p class="text-center">
-            <img src="SJTU_logo_red.png"
-            style="max-width: 275px;float:rigleftht;"><img src="acalab.png"
-            style="max-width: 310px;float:rigleftht;">
-          </p>
-        </div>
-    
-      </div>
-      </div>
-    </div> -->
+                    <div id="publication" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                        <b>Publication [<a href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en">Google Citation</a>]</b>
+                    </div>
+                    <br>
+                    <li><strong>Jungang Yang</strong>; Liyao Xiang; Pengzhi Chu; Xinbing Wang; Chenghu Zhou; "Certified Distributional Robustness on Smoothed Classifiers," in IEEE Transactions on Dependable and Secure Computing (TDSC), 2023. (CCF-A)
+                    <a href="https://ieeexplore.ieee.org/document/10093123">[Link]</a></li>
 
+                    <li><strong>Jungang Yang</strong>; Liyao Xiang; Ruidong Chen; Weiting Li; Baochun Li; "Differential Privacy for Tensor-Valued Queries," in IEEE Transactions on Information Forensics & Security (TIFS), 2021. (CCF-A)
+                    <a href="https://ieeexplore.ieee.org/document/9456908">[Link]</a></li> 
 
-                <div>
-                  <p class="text-center">
-                    <img src="SJTU_logo_red.png" style="max-width: 275px;float:rigleftht;"><img src="acalab.png"
-                      style="max-width: 310px;float:rigleftht;">
-                  </p>
+                    <li><strong>Jungang Yang</strong>;  Liyao Xiang; Jiahao Yu; Xinbing Wang; Bin Guo; Zhetao Li; Baochun Li; "Matrix Gaussian Mechanisms for Differentially-Private Learning," in IEEE Transactions on Mobile Computing (TMC), 2021. (CCF-A)
+                    <a href="https://ieeexplore.ieee.org/document/9475590">[Link]</a></li> 
+
+                    <li>Liyao Xiang*; Weiting Li; <strong>Jungang Yang</strong>; Xinbing Wang; Baochun Li; ‘‘Differentially-Private Deep Learning with Directional Noise," in IEEE Transactions on Mobile Computing (TMC), 2021. (CCF-A)
+                    <a href="https://ieeexplore.ieee.org/document/9456908">[Link]</a></li>
+
+                    <hr style="height:2px;border:none;border-top:2px solid #555555;">
+                    
+                    <div id="academic" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
+                        <b>Academic Activities</b>
+                    </div>
+                    <br>
+                    <h5>Conference Reviewers</h5>
+                    <ul>
+                        <li>Proc. IEEE International Conference on Computer Communications (INFOCOM)</li>
+                        <li>Transactions on Sensor Networks (TOSN)</li>
+                        <li>IEEE Transactions on Information Forensics & Security (TIFS)</li>
+                        <li>IEEE Transactions on Dependable and Secure Computing (TDSC)</li>
+                    </ul>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div>
-                  <p style="font-size:0.8em; float:right; color:#b5bec9;"> Thanks to <u> <a style="color:#b5bec9"
-                        target="_blank" href="https://mavroud.is/">Vasilios Mavroudis</a></u> for the <u><a
-                        style="color:#b5bec9" target="_blank"
-                        href="https://github.com/mavroudisv/plain-academic">template</a></u>!</p>
-                </div>
-                <!-- <script src="http://jerry-cdn.b0.upaiyun.com/hit-kounter/hit-kounter-0.1.1.js"></script>
-  <span>本站总访问量 <span data-hk-page="current"> - </span>次</span> -->
-                <script>
-                  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+    <script>
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        toggleSwitch.addEventListener('change', function(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
 
-                  function switchTheme(e) {
-                    if (e.target.checked) {
-                      document.documentElement.setAttribute('data-theme', 'dark');
-                    } else {
-                      document.documentElement.setAttribute('data-theme', 'light');
-                    }
-                  }
-
-                  toggleSwitch.addEventListener('change', switchTheme, true);
-
-                  function switchTheme(e) {
-                    if (e.target.checked) {
-                      document.documentElement.setAttribute('data-theme', 'dark');
-                      localStorage.setItem('theme', 'dark'); //add this
-                    } else {
-                      document.documentElement.setAttribute('data-theme', 'light');
-                      localStorage.setItem('theme', 'light'); //add this
-                    }
-                  }
-
-
-                  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-
-                  if (currentTheme) {
-                    document.documentElement.setAttribute('data-theme', currentTheme);
-
-                    if (currentTheme === 'dark') {
-                      toggleSwitch.checked = true;
-                    }
-                  }
-                  
-                </script>
-                <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> -->
-                <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-                <script src="https://kit.fontawesome.com/a24320d871.js" crossorigin="anonymous"></script>
-      
-                <script
-                  type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
-      
-                <!--start-smooth-scrolling-->
-                <script type="text/javascript" src="js/move-top.js"></script>
-                <script type="text/javascript" src="js/easing.js"></script>
-                <script type="text/javascript">
-                  jQuery(document).ready(function ($) {
-                    $(".scroll").click(function (event) {
-                      event.preventDefault();
-                      $('html,body').animate({ scrollTop: $(this.hash).offset().top }, 1000);
-                    });
-                  });
-                </script>
-
-          </body>
-
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+    </script>
+</body>
 </html>
