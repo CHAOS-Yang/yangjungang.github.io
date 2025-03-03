@@ -101,12 +101,36 @@
             border: 1px solid var(--dark);
         }
 
-        /* 暗色模式 */
+                /* 更新深色模式变量 */
         [data-theme="dark"] {
             --primary: #E0E0E0;
             --secondary: #4FC3F7;
-            --light: #121212;
-            --dark: #FFFFFF;
+            --light: #121212;      /* 深色背景 */
+            --dark: #EEEEEE;       /* 更亮的文字颜色 */
+            --card-bg: #1E1E1E;    /* 新增卡片背景 */
+        }
+
+        /* 调整全局样式 */
+        body {
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        /* 优化卡片对比度 */
+        section, .contact {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.1);  /* 添加浅色边框 */
+        }
+
+        /* 确保所有文字元素使用正确变量 */
+        h1, h2, h3 {
+            color: var(--primary);
+        }
+
+        /* 调整链接对比度 */
+        a {
+            color: var(--secondary);
+            text-decoration-color: rgba(255,255,255,0.3);
         }
 
         @media (max-width: 768px) {
@@ -128,7 +152,7 @@
         </header>
 
         <div class="profile">
-            <img src="img/fig.jpg" height="400" width="400" alt="Profile Photo" class="profile-img">
+            <img src="img/fig.jpg" alt="Profile Photo" class="profile-img">
             <div class="contact">
                 <p><strong>Assistant Professor</strong><br>
                 <a href="https://cs.shu.edu.cn/ ">Computer Science</a><br>
