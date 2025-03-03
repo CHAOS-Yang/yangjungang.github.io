@@ -4,97 +4,43 @@
     <title>Jungang Yang's Homepage</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    
+    <!-- 预连接关键外部资源 -->
+    <link rel="preconnect" href="https://maxcdn.bootstrapcdn.com">
+    <link rel="preconnect" href="https://scholar.google.com">
+    
+    <!-- 关键CSS内联 -->
     <style>
-        :root {
-            --primary-color: #1B6FC2;
-            --font-color: #000000;
-            --bg-color: #f0ecf0;
-            --heading-color: #292922;
-        }
-
-        [data-theme="dark"] {
-            --primary-color: #5ef2f2;
-            --font-color: #e7e7e8;
-            --bg-color: #352c2c;
-            --heading-color: #818cab;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--font-color);
-        }
-
-        a {
-            color: var(--primary-color);
-        }
-
-        hr {
-            margin-top: 2.5em;
-            margin-bottom: 0.5em;
-            border-style: inset;
-            border-width: .5px;
-        }
-
-        .theme-switch {
-            display: inline-block;
-            height: 27px;
-            position: absolute;
-            width: 32px;
-            right: 70px;
-            top: 7px;
-        }
-
-        .theme-switch input {
-            display: none;
-        }
-
-        .slider {
-            background-color: #b3b3b3;
-            cursor: pointer;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            top: 12px;
-            transition: .4s;
-        }
-
-        .slider:before {
-            background-color: #FEFDF9;
-            content: "";
-            height: 15px;
-            left: 0px;
-            position: absolute;
-            top: 0;
-            transition: .4s;
-            width: 15px;
-        }
-
-        input:checked + .slider {
-            background-color: #dcd3ea;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(17px);
-        }
-
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round:before {
-            border-radius: 50%;
+        :root { --primary-color: #1B6FC2; --font-color: #000000; --bg-color: #f0ecf0; --heading-color: #292922; }
+        [data-theme="dark"] { --primary-color: #5ef2f2; --font-color: #e7e7e8; --bg-color: #352c2c; --heading-color: #818cab; }
+        body { background-color: var(--bg-color); color: var(--font-color); }
+        a { color: var(--primary-color); }
+        .theme-switch { position: absolute; right: 70px; top: 7px; }
+        
+        /* 合并后的关键normalize规则 */
+        html{line-height:1.15;-webkit-text-size-adjust:100%}
+        body{margin:0}
+        img{border-style:none}
+        @media screen and (max-width:768px){
+            .container{padding:15px}
+            .navbar-nav{float:none!important}
         }
     </style>
-</head>
-<body>
 
-    <!-- Navigation -->
+    <!-- 异步加载非关键CSS -->
+    <link rel="preload" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"></noscript>
+</head>
+
+<body>
+    <!-- 导航栏优化 -->
     <nav class="navbar navbar-inverse navbar-static-top">
         <div class="container">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-menu">
+                <button type="button" class="navbar-toggle collapsed" 
+                        data-toggle="collapse" 
+                        data-target="#navbar-menu"
+                        aria-label="Toggle navigation">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -106,8 +52,8 @@
                     <li><a href="#research">Research</a></li>
                     <li><a href="#publication">Publication</a></li>
                     <li><a href="#projects">Project</a></li>
-                    <li><a href="./img/Wechat_QR_code.jpg" target="_blank">Wechat</a></li>
-                    <li><a href="./files/cv.pdf" target="_blank">CV</a></li>
+                    <li><a href="./img/Wechat_QR_code.jpg" target="_blank" rel="noopener noreferrer">Wechat</a></li>
+                    <!-- <li><a href="./files/cv.pdf" target="_blank" rel="noopener noreferrer">CV</a></li> -->
                 </ul>
                 <div class="theme-switch-wrapper">
                     <label class="theme-switch" for="checkbox">
@@ -119,173 +65,105 @@
         </div>
     </nav>
 
+    <!-- 内容区域优化 -->
     <div class="container">
         <div class="row">
-            <!-- Sidebar -->
             <div class="col-md-3">
-                <div style="font-family: Arial, Helvetica, sans-serif; font-size: 27px;"><b>Jungang Yang</b></div>
-                <br>
-                <img class="img-responsive" src="img/fig.jpg" height="400" width="400" alt=""><br>
+                <h1>Jungang Yang</h1>
+                <img class="img-responsive" 
+                     src="img/fig.jpg" 
+                     alt="Profile Photo"
+                     loading="lazy"
+                     decoding="async"
+                     style="background: #f0f0f0">
                 <p>Assistant professor<br>
-                    <a href="https://cs.shu.edu.cn/">CS</a> <br>
-                    Shanghai University<br>
+                    <a href="https://cs.shu.edu.cn/" rel="noopener noreferrer">CS</a><br>
+                    Shanghai University
                 </p>
-                <p>
+                <address>
                     <b>Email:</b> <a href="mailto:yangjungang@shu.edu.cn">yangjungang@shu.edu.cn</a><br>
-                    <b>Wechat:</b> In QR code<br>
-                </p>
-                <p><a href="https://j.map.baidu.com/fc/Sil"><i class="fas fa-map-marked-alt" aria-hidden="true"></i></a> 99 Shangda Road, CS Building, Baoshan District, Shanghai </p>
-                <dd><a href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en">Google Scholar</a></dd>
-                <dd><a href="#">Twitter</a></dd>
-                <dd><a href="#">LinkedIn</a></dd>
-                <p>My friends:
-                  <b><a href="https://mxhx7199.github.io">Fangxin Liu (刘方鑫)</a>:</b> Assistant Professor
-                  ACA Lab, SEIEE
-                  Shanghai Jiao Tong University<br>
-                </p>
+                    <b>Address:</b> 99 Shangda Road, CS Building, Baoshan District, Shanghai
+                </address>
+                <div class="social-links">
+                    <a href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en" 
+                       target="_blank" 
+                       rel="noopener noreferrer">Google Scholar</a>
+                </div>
             </div>
 
-            <!-- Main Content -->
-            
-                <!-- main info -->
-                <div class="row">
-                  <div class="col-md-8">
-                    <div style="margin-top:5vh; text-align:justify;">
-                      <div style="text-align:left;">
-                        <div id="Aboutme" style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;"><b>About
-                            me</b></div>
-                        <br>
-                        <p>
-                          Jungang Yang is currently an assistant professor at Shanghai University(SHU).
-                        </p>
-                        <p>
-                        He obtained his Ph.D. Degree in Computer Science and Technology from Shanghai Jiao Tong University in 2024 under the supervision of Prof. <a href="https://xiangliyao.cn">Liyao Xiang</a>. His research focuses on differential privacy, adversarial learning, and federated learning.
-                        He received the Bachelor's degree in Information and Computing Science from Nanjing University, Nanjing,  China, in 2019.
-                        </p>
-                        <p>
-                            Undergraduate students interested in Differential Privacy or Unmanned Gaming Confrontation research are very welcome to contact with e-mail or Wechat! 
-                        </p>
-                        <!-- <br>
-                        <HR> -->
-                        <!-- <p>The papers and related resources will be shared on my <a -->
-                            <!-- href="https://github.com/MXHX7199">Github</a> in the near future.</p> -->
-                      </div>
-                      <hr style="height:2px;border:none;border-top:2px solid #000000;" />
-                      <div style="margin-top:3vh; text-align:left;">
-                        <div id="research" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Research</b>
-                        </div>
-                        <p> Current research interests focuses on:
-                        <ul>
-                          <li>Differential privacy (差分隐私)</li>
-                          <li>Adversarial learning(对抗学习)</li>
-                          <li>Federated Learning(联邦学习)</li>
-                        </ul>
-                        </p>
-                      </div>
+            <!-- 主内容区域 -->
+            <div class="col-md-8">
+                <section id="about">
+                    <h2>About Me</h2>
+                    <p>
+                    Jungang Yang is currently an assistant professor at Shanghai University(SHU).
+                    </p>
+                    <p>
+                    He obtained his Ph.D. Degree in Computer Science and Technology from Shanghai Jiao Tong University in 2024 under the supervision of Prof. <a href="https://xiangliyao.cn">Liyao Xiang</a>. His research focuses on differential privacy, adversarial learning, and federated learning.
+                    He received the Bachelor's degree in Information and Computing Science from Nanjing University, Nanjing,  China, in 2019.
+                    </p>
+                    <p>
+                        Undergraduate students interested in Differential Privacy or Unmanned Gaming Confrontation research are very welcome to contact with e-mail or Wechat!
+                    </p>
+                </section>
 
+                <section id="research">
+                    <h2>Research</h2>
+                    <ul>
+                        <li>Differential privacy (差分隐私)</li>
+                        <li>Adversarial learning(对抗学习)</li>
+                        <li>Federated Learning(联邦学习)</li>
+                    </ul>
+                </section>
 
-
-
-                      </div>
-                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
-                      <div style="margin-top:3vh; text-align:left;">
-                        <div id="publication" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Publication [<a
-                              href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en">Google
-                              Citation</a>]</b>
-                        </div>
-
-                        <br>
+                <section id="publication">
+                    <h2>Publications</h2>
+                    <ul class="publication-list">
                         <li><strong>Jungang Yang</strong>; Liyao Xiang; Pengzhi Chu; Xinbing Wang; Chenghu Zhou; "Certified Distributional Robustness on Smoothed Classifiers," in IEEE Transactions on Dependable and Secure Computing (TDSC), Digital Object Identifier: 10.1109/TDSC.2023.3264850, 2023. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/10093123">[Link]</a>
+                        <a href="https://ieeexplore.ieee.org/document/10093123" target="_blank" rel="noopener noreferrer">[Link]</a>
 
-                        <br>
+                        
                         <li><strong>Jungang Yang</strong>; Liyao Xiang; Ruidong Chen; Weiting Li; Baochun Li; "Differential Privacy for Tensor-Valued Queries," in IEEE Transactions on Information Forensics & Security (TIFS), Digital Object Identifier: 10.1109/TIFS.2021.3089884, 2021. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/9456908">[Link]</a> 
+                        <a href="https://ieeexplore.ieee.org/document/9456908" target="_blank" rel="noopener noreferrer">[Link]</a> 
 
-                        <br>
+                        
                         <li><strong>Jungang Yang</strong>;  Liyao Xiang; Jiahao Yu; Xinbing Wang; Bin Guo; Zhetao Li; Baochun Li; "Matrix Gaussian Mechanisms for Differentially-Private Learning," in IEEE Transactions on Mobile Computing (TMC), Digital Object Identifier: 10.1109/TMC.2021.3093316, 2021. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/9475590">[Link]</a> 
+                        <a href="https://ieeexplore.ieee.org/document/9475590" target="_blank" rel="noopener noreferrer">[Link]</a> 
 
-                        <br>
+                        
                         <li>Liyao Xiang*;Weiting Li; <strong>Jungang Yang</strong>; Xinbing Wang; Baochun Li; ‘‘Differentially-Private Deep Learning with Directional Noise," in IEEE Transactions on Mobile Computing (TMC), 2021. (CCF-A)
-                        <a href="https://ieeexplore.ieee.org/document/9456908">[Link]</a> 
-
-
-                        </p>
-                        </li>
-                      </div>
-                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
-                      <!-- <div style="margin-top:3vh; text-align:left;">
-                        <div id="awards" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Awards</b>
-                        </div>
-                        <br>
-                        <li>National Scholarship, 2022.
-                        </li>
-                        <li>National Scholarship, 2021.
-                        </li>
-                        <li>Wu Wen Jun Honorary Doctoral Scholarship, 2021.
-                        </li>
-                        <li>Best Paper Award from DATE, 2022.
-                        </li>
-                        <li>Spark Award from HUAWEI, 2022.
-                      </div> -->
-
-                      <hr style="height:2px;border:none;border-top:2px solid #555555;" />
-                      <div style="margin-top:3vh; text-align:left;">
-                        <div id="academic" align="justify" ,
-                          style="font-family: Arial, Helvetica, sans-serif; font-size: 23px;">
-                          <b>Academic Activities</b>
-                        </div>
-                        <br>
-                        <h5>Conference Reviewers</h5>
-                        <ul>
-                          <li> Proc. IEEE International Conference on Computer Communications (INFOCOM)</li>
-                          <li> Transactions on Sensor Networks (TOSN)</li>
-                          <li> IEEE Transactions on Information Forensics & Security (TIFS)</li>
-                          <li> IEEE Transactions on Dependable and Secure Computing (TDSC)</li>
-                        </ul>
-                      </div>
-
-                        <HR>
-
-
-
-                        </tbody>
-                        </table> 
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                        <a href="https://ieeexplore.ieee.org/document/9456908" target="_blank" rel="noopener noreferrer">[Link]</a> 
+                        <!-- <li><strong>Jungang Yang</strong>; Liyao Xiang; et al. "Certified Distributional Robustness..." 
+                            <a href="https://ieeexplore.ieee.org/document/10093123" target="_blank" rel="noopener noreferrer">[Link]</a>
+                        </li> -->
+                        <!-- 其他出版物 -->
+                    </ul>
+                </section>
+                <section id="Academic Activities">
+                <h2>Reviewers</h2>
+                    <ul>
+                    <li> Proc. IEEE International Conference on Computer Communications (INFOCOM)</li>
+                    <li> Transactions on Sensor Networks (TOSN)</li>
+                    <li> IEEE Transactions on Information Forensics & Security (TIFS)</li>
+                    <li> IEEE Transactions on Dependable and Secure Computing (TDSC)</li>
+                    </ul>
             </div>
         </div>
     </div>
 
+    <!-- 优化后的JS -->
     <script>
-        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        toggleSwitch.addEventListener('change', function(e) {
-            if (e.target.checked) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            }
-        });
-
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'dark') {
-                toggleSwitch.checked = true;
-            }
-        }
+        (function(){
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('checkbox').checked = theme === 'dark';
+            
+            document.getElementById('checkbox').addEventListener('change', e => {
+                const mode = e.target.checked ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', mode);
+                localStorage.setItem('theme', mode);
+            });
+        })();
     </script>
 </body>
 </html>
