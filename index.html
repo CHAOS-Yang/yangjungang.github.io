@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jungang Yang(杨军港) | Shanghai University</title>
+    <title>Jungang Yang (杨军港) | Shanghai University</title>
     <style>
         :root {
             --primary: #2C3E50;
@@ -11,13 +11,24 @@
             --light: #F8F9FA;
             --dark: #212529;
             --gap: 2rem;
+            --card-bg: #FFFFFF;
+            --border-color: rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #E0E0E0;
+            --secondary: #4FC3F7;
+            --light: #121212;
+            --dark: #EEEEEE;
+            --card-bg: #1E1E1E;
+            --border-color: rgba(255,255,255,0.1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, "Microsoft YaHei", sans-serif;
         }
 
         body {
@@ -40,7 +51,27 @@
             align-items: center;
             margin-bottom: 3rem;
             padding: 1rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-switch {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: var(--light);
+            border: 1px solid var(--dark);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .btn-switch:hover {
+            opacity: 0.8;
         }
 
         .profile {
@@ -57,21 +88,23 @@
         }
 
         .contact {
-            background: white;
+            background: var(--card-bg);
             padding: 1.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
         }
 
         section {
             margin-bottom: 3rem;
-            background: white;
+            background: var(--card-bg);
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
         }
 
-        h1, h2 {
+        h1, h2, h3 {
             color: var(--primary);
             margin-bottom: 1rem;
         }
@@ -93,53 +126,25 @@
             border-left: 3px solid var(--secondary);
         }
 
-        .theme-switch {
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            background: var(--light);
-            border: 1px solid var(--dark);
-        }
-
-                /* 更新深色模式变量 */
-        [data-theme="dark"] {
-            --primary: #E0E0E0;
-            --secondary: #4FC3F7;
-            --light: #121212;      /* 深色背景 */
-            --dark: #EEEEEE;       /* 更亮的文字颜色 */
-            --card-bg: #1E1E1E;    /* 新增卡片背景 */
-        }
-
-        /* 调整全局样式 */
-        body {
-            color: var(--dark);
-            background: var(--light);
-        }
-
-        /* 优化卡片对比度 */
-        section, .contact {
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.1);  /* 添加浅色边框 */
-        }
-
-        /* 确保所有文字元素使用正确变量 */
-        h1, h2, h3 {
-            color: var(--primary);
-        }
-
-        /* 调整链接对比度 */
-        a {
-            color: var(--secondary);
-            text-decoration-color: rgba(255,255,255,0.3);
-        }
+        /* 语言显示控制逻辑 */
+        html[lang="en"] .zh { display: none; }
+        html[lang="zh"] .en { display: none; }
 
         @media (max-width: 768px) {
             .profile {
                 grid-template-columns: 1fr;
             }
-            
             .container {
                 padding: 1rem;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .header-controls {
+                width: 100%;
+                justify-content: flex-end;
             }
         }
     </style>
@@ -147,83 +152,141 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1>Jungang Yang</h1>
-            <div class="theme-switch" onclick="toggleTheme()">🌓</div>
+            <h1>
+                <span class="en">Jungang Yang</span>
+                <span class="zh">杨军港</span>
+            </h1>
+            <div class="header-controls">
+                <div class="btn-switch" onclick="toggleLang()" id="langBtn">中/En</div>
+                <div class="btn-switch" onclick="toggleTheme()">🌓</div>
+            </div>
         </header>
 
         <div class="profile">
             <img src="img/fig.jpg" alt="Profile Photo" class="profile-img">
             <div class="contact">
-                <p><strong>Assistant Professor</strong><br>
-                <a href="https://cs.shu.edu.cn/ ">Computer Science</a><br>
-                Shanghai University</p>
+                <p>
+                    <strong>
+                        <span class="en">Assistant Professor</span>
+                        <span class="zh">助理教授 / 硕士生导师</span>
+                    </strong><br>
+                    <a href="https://cs.shu.edu.cn/">
+                        <span class="en">Computer Science</span>
+                        <span class="zh">计算机工程与科学学院</span>
+                    </a><br>
+                    <span class="en">Shanghai University</span>
+                    <span class="zh">上海大学</span>
+                </p>
                 
                 <p>📧 <a href="mailto:yangjungang@shu.edu.cn">yangjungang@shu.edu.cn</a></p>
-                <p>🏢 99 Shangda Road, CS Building, Baoshan District, Shanghai</p>
+                <p>
+                    🏢 
+                    <span class="en">99 Shangda Road, CS Building, Baoshan District, Shanghai</span>
+                    <span class="zh">上海市宝山区上大路99号 计算机楼</span>
+                </p>
                 
                 <div class="social-links" style="margin-top:1rem;">
-                    <a href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en " target="_blank">Google Scholar</a> •
+                    <a href="https://scholar.google.com/citations?user=5oiGMvIAAAAJ&hl=en" target="_blank">Google Scholar</a> •
                     <a href="./img/Wechat_QR_code.jpg" target="_blank">WeChat</a>
                 </div>
             </div>
         </div>
 
         <section id="about">
-            <h2>About Me</h2>
-            <p>Currently an assistant professor at Shanghai University. Obtained Ph.D. in Computer Science from Shanghai Jiao Tong University (2024) under Prof. <a href="https://xiangliyao.cn">Liyao Xiang（向立瑶）</a>. Research focuses on differential privacy, adversarial learning, and federated learning.</p>
-            <p style="margin-top:1rem;">🔬 Undergraduate students interested in Differential Privacy or Unmanned Gaming Confrontation research are welcome to contact via email or WeChat!（目前 25 级硕士已招完，欢迎 26 级后的同学联系，目前有一个名额，招完后更新）</p>
+            <h2>
+                <span class="en">About Me</span>
+                <span class="zh">个人简介</span>
+            </h2>
+            <div class="en">
+                <p>Currently an assistant professor at Shanghai University. Obtained Ph.D. in Computer Science from Shanghai Jiao Tong University (2024) under Prof. <a href="https://xiangliyao.cn">Liyao Xiang (向立瑶)</a>. Obtained M.S. in Mathematics from Nanjing University of Science and Technology (2019). Research focuses on differential privacy, adversarial learning, and federated learning.</p>
+                <p style="margin-top:1rem;">🔬 Undergraduate students interested in  AI security, data security, differential privacy, adversarial learning, and federated learning research are welcome to contact via email or WeChat! If you are interested in doing a project or a thesis, please contact me first.<br><em>(Note: Quota for 2025/2026 Master students is full)</em></p>
+            </div>
+            <div class="zh">
+                <p>上海大学计算机工程与科学学院助理教授。2024年于上海交通大学获得计算机科学博士学位，师从<a href="https://xiangliyao.cn">向立瑶教授</a>，2019 年本科毕业于南京大学数学系。主要研究方向包括数据安全、差分隐私、对抗学习和联邦学习。</p>
+                <p style="margin-top:1rem;">🔬 欢迎对人工智能安全、数据隐私保护、差分隐私研究感兴趣的本科生通过邮件或微信联系！推荐考研或者保研的同学需要做毕业设计的提前联系，灵活定制毕设课题。<br><em>（注：目前 25、26 级硕士已招完）</em></p>
+            </div>
         </section>
 
         <section id="research">
-            <h2>Research Areas</h2>
+            <h2>
+                <span class="en">Research Areas</span>
+                <span class="zh">研究方向</span>
+            </h2>
             <ul style="columns:2; list-style:none;">
-                <li>• Differential Privacy</li>
-                <li>• Adversarial Learning</li>
-                <li>• Federated Learning</li>
+                <li>
+                    <span class="en">• Data Security</span>
+                    <span class="zh">• 数据安全 (Data Security)</span>
+                </li>
+                <li>
+                    <span class="en">• Differential Privacy</span>
+                    <span class="zh">• 差分隐私 (Differential Privacy)</span>
+                </li>
+                <li>
+                    <span class="en">• Adversarial Learning</span>
+                    <span class="zh">• 对抗学习 (Adversarial Learning)</span>
+                </li>
+                <li>
+                    <span class="en">• Federated Learning</span>
+                    <span class="zh">• 联邦学习 (Federated Learning)</span>
+                </li>
             </ul>
         </section>
 
         <section id="publications">
-            <h2>Selected Publications</h2>
+            <h2>
+                <span class="en">Selected Publications</span>
+                <span class="zh">代表性论文</span>
+            </h2>
             <ul class="publication-list">
-                <!-- 保持原有出版物内容 -->
                 <li><strong>Jungang Yang</strong>; Liyao Xiang; Pengzhi Chu; Xinbing Wang; Chenghu Zhou; "Certified Distributional Robustness on Smoothed Classifiers," in IEEE Transactions on Dependable and Secure Computing (TDSC), Digital Object Identifier: 10.1109/TDSC.2023.3264850, 2023. (CCF-A)
-                    <a href="https://ieeexplore.ieee.org/document/10093123" target="_blank" rel="noopener noreferrer">[Link]</a>
-
-                    
-                    <li><strong>Jungang Yang</strong>; Liyao Xiang; Ruidong Chen; Weiting Li; Baochun Li; "Differential Privacy for Tensor-Valued Queries," in IEEE Transactions on Information Forensics & Security (TIFS), Digital Object Identifier: 10.1109/TIFS.2021.3089884, 2021. (CCF-A)
-                    <a href="https://ieeexplore.ieee.org/document/9456908" target="_blank" rel="noopener noreferrer">[Link]</a> 
-
-                    
-                    <li><strong>Jungang Yang</strong>;  Liyao Xiang; Jiahao Yu; Xinbing Wang; Bin Guo; Zhetao Li; Baochun Li; "Matrix Gaussian Mechanisms for Differentially-Private Learning," in IEEE Transactions on Mobile Computing (TMC), Digital Object Identifier: 10.1109/TMC.2021.3093316, 2021. (CCF-A)
-                    <a href="https://ieeexplore.ieee.org/document/9475590" target="_blank" rel="noopener noreferrer">[Link]</a> 
-
-                    
-                    <li>Liyao Xiang*;Weiting Li; <strong>Jungang Yang</strong>; Xinbing Wang; Baochun Li; "Differentially-Private Deep Learning with Directional Noise," in IEEE Transactions on Mobile Computing (TMC), 2021. (CCF-A)
-                    <a href="https://ieeexplore.ieee.org/document/9456908" target="_blank" rel="noopener noreferrer">[Link]</a> 
-                <!-- 其他出版物保持相同结构 -->
+                <a href="https://ieeexplore.ieee.org/document/10093123" target="_blank" rel="noopener noreferrer">[Link]</a>
+                </li>
+                
+                <li><strong>Jungang Yang</strong>; Liyao Xiang; Ruidong Chen; Weiting Li; Baochun Li; "Differential Privacy for Tensor-Valued Queries," in IEEE Transactions on Information Forensics & Security (TIFS), Digital Object Identifier: 10.1109/TIFS.2021.3089884, 2021. (CCF-A)
+                <a href="https://ieeexplore.ieee.org/document/9456908" target="_blank" rel="noopener noreferrer">[Link]</a> 
+                </li>
+                
+                <li><strong>Jungang Yang</strong>;  Liyao Xiang; Jiahao Yu; Xinbing Wang; Bin Guo; Zhetao Li; Baochun Li; "Matrix Gaussian Mechanisms for Differentially-Private Learning," in IEEE Transactions on Mobile Computing (TMC), Digital Object Identifier: 10.1109/TMC.2021.3093316, 2021. (CCF-A)
+                <a href="https://ieeexplore.ieee.org/document/9475590" target="_blank" rel="noopener noreferrer">[Link]</a> 
+                </li>
+                
+                <li>Liyao Xiang*; Weiting Li; <strong>Jungang Yang</strong>; Xinbing Wang; Baochun Li; "Differentially-Private Deep Learning with Directional Noise," in IEEE Transactions on Mobile Computing (TMC), 2021. (CCF-A)
+                <a href="https://ieeexplore.ieee.org/document/9456908" target="_blank" rel="noopener noreferrer">[Link]</a> 
+                </li>
             </ul>
         </section>
 
         <section id="activities">
-            <h2>Academic Activities</h2>
-            <p>Reviewer for:</p>
+            <h2>
+                <span class="en">Academic Activities</span>
+                <span class="zh">学术活动</span>
+            </h2>
+            <p>
+                <span class="en">Reviewer for:</span>
+                <span class="zh">担任以下期刊/会议审稿人：</span>
+            </p>
             <ul style="columns:2; list-style:none;">
                 <li>• IEEE INFOCOM</li>
                 <li>• TOSN</li>
                 <li>• IEEE TIFS</li>
                 <li>• IEEE TDSC</li>
             </ul>
-            <h2>My friends</h2>
+            
+            <h2 style="margin-top: 2rem;">
+                <span class="en">My Friends</span>
+                <span class="zh">友情链接</span>
+            </h2>
             <p>
-                <a href="https://mxhx7199.github.io">Fangxin Liu</a>: Assistant Professor
-                ACA Lab, SEIEE
-                Shanghai Jiao Tong University<br>
+                <a href="https://mxhx7199.github.io">Fangxin Liu (刘方鑫)</a>: 
+                <span class="en">Assistant Professor, ACA Lab, SEIEE, Shanghai Jiao Tong University</span>
+                <span class="zh">上海交通大学 电子信息与电气工程学院 ACA实验室 助理教授</span>
+                <br>
             </p>
         </section>
     </div>
 
     <script>
+        // 主题切换逻辑
         function toggleTheme() {
             const current = document.documentElement.getAttribute('data-theme') || 'light';
             const newTheme = current === 'light' ? 'dark' : 'light';
@@ -231,9 +294,33 @@
             localStorage.setItem('theme', newTheme);
         }
 
-        // 初始化主题
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        // 语言切换逻辑
+        function toggleLang() {
+            const currentLang = document.documentElement.getAttribute('lang') || 'en';
+            const newLang = currentLang === 'en' ? 'zh' : 'en';
+            document.documentElement.setAttribute('lang', newLang);
+            localStorage.setItem('lang', newLang);
+            
+            // 更新按钮文本（可选，增加交互感）
+            // const btn = document.getElementById('langBtn');
+            // btn.innerText = newLang === 'en' ? 'Switch to 中文' : 'Switch to English';
+        }
+
+        // 初始化设置
+        window.addEventListener('DOMContentLoaded', () => {
+            // 初始化主题
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+
+            // 初始化语言
+            const savedLang = localStorage.getItem('lang');
+            // 如果本地有存语言设置，则使用；否则默认使用英语 (en)
+            if (savedLang) {
+                document.documentElement.setAttribute('lang', savedLang);
+            }
+        });
     </script>
 </body>
 </html>
