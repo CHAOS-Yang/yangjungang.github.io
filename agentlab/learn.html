@@ -122,21 +122,21 @@
             <span class="brand-mark" aria-hidden="true">A</span>
             <span><span class="brand-name">AGENTLAB</span><span class="brand-sub">BUILD · EXPLORE · RESEARCH</span></span>
         </a>
-        <nav aria-label="主导航"><a href="./">项目主页</a><a href="./#directions">探索方向</a></nav>
+        <nav aria-label="主导航"><a href="./">项目主页</a><a href="demo.html">先试一个 Demo</a><a href="./#directions">探索方向</a></nav>
     </header>
     <main class="shell">
         <section class="hero" aria-labelledby="page-title">
             <p class="eyebrow">A short path into LLM-based Agents</p>
             <h1 id="page-title">先理解 <span>LLM</span>，再让它成为 Agent。</h1>
-            <p class="hero-copy">把研究生共享材料里的共同基础，压缩成四站、每站约 20–30 分钟的学习路径。每站读一点、做一点、检查一次理解；学完再按兴趣进入工程、科研或安全方向。</p>
+            <p class="hero-copy">这里挑出了理解 Agent 最有用的几项基础，整理成四站、每站约 20–30 分钟。可以读一点、试一点；按自己的兴趣选着看就好。</p>
             <div class="callout"><strong>这条路线适合谁？</strong><span>正在学习 LLM-based Agent、Coding Agent 或 Agent 安全的同学。图像、音频、视频生成也属于 AIGC，但有各自的模型基础，可以后续另设路线；不必先学完所有 LLM 内容。</span></div>
         </section>
 
         <section class="progress-panel" aria-label="学习进度">
-            <span class="progress-label">你的四站学习路线</span>
-            <span class="progress-count" id="progress-count">已完成 0 / 4</span>
-            <div class="progress-track" role="progressbar" aria-label="已完成学习站点" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
-            <p class="next-hint" id="next-hint" aria-live="polite">建议从第 1 站开始。完成状态保存在当前浏览器中。</p>
+            <span class="progress-label">你的四站入门路线</span>
+            <span class="progress-count" id="progress-count">已看 0 / 4</span>
+            <div class="progress-track" role="progressbar" aria-label="已浏览学习站点" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+            <p class="next-hint" id="next-hint" aria-live="polite">可以从第 1 站开始，也可以挑感兴趣的内容先看。浏览进度保存在当前浏览器中。</p>
         </section>
 
         <section class="lesson-list" aria-label="四站学习内容">
@@ -152,10 +152,10 @@
                         <div class="concept"><strong>模型在做什么</strong><span>基于上下文生成后续文本；训练阶段学到语言、代码等模式。</span></div>
                         <div class="concept"><strong>应用在做什么</strong><span>把提示、模型和程序连接起来；调用 API 不等于重新训练模型。</span></div>
                     </div>
-                    <div class="task"><strong>2 分钟练习</strong><p>问一个模型：“请给我一条关于某论文的结论和出处。”打开原论文核对作者、结论和页码，记录一个需要更正的地方。</p></div>
+                    <div class="task"><strong>如果你愿意，试个 2 分钟的小观察</strong><p>请模型给出一条论文结论和出处，再对照原文看看是否对应。发现不一致的话，可以记下来以后聊。</p></div>
                     <a class="resource-link" href="https://www.bilibili.com/video/BV1kD421H7Yg/" target="_blank" rel="noopener noreferrer">可选视频：李宏毅《80 分钟快速了解大型语言模型》↗</a>
                     <details class="answer"><summary>自测：为什么回答很流畅，也可能是错的？</summary><p>语言模型生成的是符合上下文的文本，不会自动附带真实性保证。把结论和可检查证据对上，才知道它是否可靠。</p></details>
-                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">标记这一站完成</button><span class="local-note">仅在此浏览器记录，不上传个人信息。</span></div>
+                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">记为已看</button><span class="local-note">只是给自己留个记号，不上传个人信息。</span></div>
                 </div>
             </article>
 
@@ -171,11 +171,11 @@
                         <div class="concept"><strong>模型</strong><span>理解当前上下文，提出计划或工具调用请求。</span></div>
                         <div class="concept"><strong>执行程序</strong><span>决定是否调用工具、校验参数和权限，并返回真实执行结果。</span></div>
                     </div>
-                    <div class="task"><strong>画一张小图</strong><p>用“查询天气”作例子，画出 用户目标 → 模型请求 → 程序调用天气工具 → 返回结果 → 模型回答，并标出哪一步会改变外部状态。</p></div>
+                    <div class="task"><strong>可以画一张小图</strong><p>用“查询天气”作例子，画出 用户目标 → 模型请求 → 程序调用天气工具 → 返回结果 → 模型回答。随手画下来，就能看清每一步的分工。</p></div>
                     <a class="resource-link" href="https://www.bilibili.com/video/BV1pzPszqErg/" target="_blank" rel="noopener noreferrer">补充讲解：李宏毅生成式 AI 与 Agent 讲次↗</a>
                     <a class="resource-link" href="https://huggingface.co/learn/agents-course/zh-CN/unit1/introduction" target="_blank" rel="noopener noreferrer">动手扩展：Hugging Face 智能体课程↗</a>
                     <details class="answer"><summary>自测：模型说“我已删除文件”，文件就一定被删了吗？</summary><p>不一定。只有应用提供了删除工具、程序允许该操作并成功执行，文件状态才会改变。模型的文字不能代替执行日志或环境检查。</p></details>
-                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">标记这一站完成</button><span class="local-note">建议保留你画的流程图。</span></div>
+                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">记为已看</button><span class="local-note">流程图可以留着，之后讨论时可能有帮助；不用提交。</span></div>
                 </div>
             </article>
 
@@ -193,10 +193,10 @@
                         <div class="concept"><strong>工具 · 程序能做什么？</strong><span>查询、读写或操作服务；工具权限决定了可能造成的影响。</span></div>
                         <div class="concept"><strong>上下文 · 此刻模型看到了什么？</strong><span>当前请求、系统指令和检索到的内容等输入信息。</span></div>
                     </div>
-                    <div class="task"><strong>3 分钟练习</strong><p>想象 Agent 要回答设备手册问题：列出它应该检索的手册版本、需要保留的用户偏好，以及可能调用的工具。三者分别归到 RAG、记忆、工具。</p></div>
+                    <div class="task"><strong>有兴趣的话，可以想一想</strong><p>如果 Agent 要回答设备手册问题，它会检索什么资料、记住什么偏好、调用什么工具？把想到的例子分一分就好。</p></div>
                     <a class="resource-link" href="https://www.bilibili.com/video/BV17i421Y7L6/" target="_blank" rel="noopener noreferrer">可选补充：Datawhale × 开放原子 Agent 课程（RAG 章节选读）↗</a>
                     <details class="answer"><summary>自测：把一本新手册放进 RAG 后，模型本身就学会这本手册了吗？</summary><p>没有。RAG 是在本次回答时检索并提供相关片段，通常改变的是当前上下文，而不是模型的训练权重。</p></details>
-                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">标记这一站完成</button><span class="local-note">不会 RAG 也可以先继续下一站。</span></div>
+                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">记为已看</button><span class="local-note">不熟悉 RAG 也没关系，可以继续看下一站。</span></div>
                 </div>
             </article>
 
@@ -220,17 +220,17 @@
                         <button class="simulate-button" id="simulate-button" type="button">模拟一次处理过程</button>
                         <div class="sim-result" id="sim-result" role="status" aria-live="polite" hidden></div>
                     </div>
-                    <div class="task"><strong>小实验之后，写下三项观察</strong><p>哪段是用户目标？哪段是待分析的外部数据？程序开放了什么权限？再想一想，如果 Agent 拥有邮件发送工具，执行前还需要加什么检查？</p></div>
+                    <div class="task"><strong>小实验之后，可以留意这几件事</strong><p>哪段是用户目标，哪段只是外部资料？程序开放了什么权限？如果你有自己的想法，也可以记下来。</p></div>
                     <a class="resource-link" href="https://gongshangzheng.github.io/dive-into-llms-ch10-agent-safety.html" target="_blank" rel="noopener noreferrer">进阶选读：《动手学大模型》Ch10 智能体安全↗</a>
                     <a class="resource-link" href="https://gongshangzheng.github.io/dive-into-llms-ch06-jailbreak.html" target="_blank" rel="noopener noreferrer">进阶选读：Ch6 越狱攻击↗</a>
                     <details class="answer"><summary>自测：模型拒绝说出危险内容，能证明 Agent 安全了吗？</summary><p>不能。评估还要检查它是否调用了工具、执行了动作、影响了外部环境，以及系统是否在执行前校验了权限。</p></details>
-                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">标记这一站完成</button><span class="local-note">安全练习只用虚构、只读的演示场景。</span></div>
+                    <div class="lesson-actions"><button class="done-button" type="button" aria-pressed="false">记为已看</button><span class="local-note">这里是虚构的只读场景，不会操作真实文件。</span></div>
                 </div>
             </article>
         </section>
 
         <section class="next-step" aria-labelledby="next-title">
-            <div><h2 id="next-title">完成基础后，挑一个问题继续做。</h2><p>把四站中的流程图、一个小 Demo 或一次评测记录带来交流，再一起匹配适合的项目。网站只公开通用学习材料，不公开尚未发布的项目 Idea。</p></div>
+            <div><h2 id="next-title">遇到感兴趣的内容，可以接着聊。</h2><p>有流程图、小 Demo 或问题时，可以带来一起讨论；还没有作品也没关系，随时都可以来信。网站介绍通用学习材料和方向。</p></div>
             <a href="./#directions">看看可以探索的方向 ↗</a>
         </section>
     </main>
@@ -247,18 +247,18 @@
 
         function renderProgress() {
             const count = completed.size;
-            document.getElementById("progress-count").textContent = `已完成 ${count} / 4`;
+            document.getElementById("progress-count").textContent = `已看 ${count} / 4`;
             document.getElementById("progress-fill").style.width = `${count * 25}%`;
             document.querySelector('[role="progressbar"]').setAttribute("aria-valuenow", String(count));
             const next = ["1", "2", "3", "4"].find((number) => !completed.has(number));
             document.getElementById("next-hint").textContent = next
-                ? `下一站：${document.querySelector(`[data-lesson="${next}"] h2`).textContent}。完成状态保存在当前浏览器中。`
-                : "四站已完成！带着你的流程图、Demo 或评测记录，去项目主页看看下一步。";
+                ? `如果想接着看，可以继续：${document.querySelector(`[data-lesson="${next}"] h2`).textContent}。`
+                : "四站都浏览过了！可以去试玩 Demo，也可以带着感兴趣的问题来交流。";
             document.querySelectorAll("[data-lesson]").forEach((lesson) => {
                 const button = lesson.querySelector(".done-button");
                 const isDone = completed.has(lesson.dataset.lesson);
                 button.setAttribute("aria-pressed", String(isDone));
-                button.textContent = isDone ? "已完成 · 点击撤销" : "标记这一站完成";
+                button.textContent = isDone ? "已看过 · 点击撤销" : "记为已看";
             });
         }
 
