@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AgentLab 面向本科生开放，从第一个 AI Agent 开始，探索科研、工程、竞赛与创新。">
+    <meta name="theme-color" content="#f4f7f4">
+    <title>AgentLab | 从第一个 Agent 开始</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #183638;
+            --muted: #5d7270;
+            --paper: #f4f7f4;
+            --card: #ffffff;
+            --line: #dce7e1;
+            --green: #087e68;
+            --green-dark: #075e52;
+            --mint: #d9f4e7;
+            --orange: #ff895f;
+            --lavender: #e9e8ff;
+            --shadow: 0 20px 60px rgba(25, 59, 52, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 90% 3%, rgba(217, 244, 231, 0.72), transparent 24rem),
+                var(--paper);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.65;
+        }
+
+        a { color: inherit; }
+
+        a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+            outline: 3px solid var(--orange);
+            outline-offset: 3px;
+        }
+
+        .shell { width: min(1160px, calc(100% - 40px)); margin: 0 auto; }
+
+        .topbar {
+            display: flex;
+            min-height: 82px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            border-bottom: 1px solid rgba(24, 54, 56, 0.1);
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+
+        .brand-mark {
+            display: grid;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            border-radius: 13px 13px 13px 4px;
+            color: white;
+            background: var(--green);
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+
+        .brand-name { font-size: 1.05rem; font-weight: 850; letter-spacing: 0.035em; }
+        .brand-sub { display: block; margin-top: -3px; color: var(--muted); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.09em; }
+
+        .nav { display: flex; align-items: center; gap: 26px; }
+        .nav a { color: var(--muted); font-size: 0.9rem; font-weight: 650; text-decoration: none; }
+        .nav a:hover { color: var(--green); }
+        .nav .home-link { padding: 9px 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); }
+
+        .hero {
+            display: grid;
+            min-height: 570px;
+            grid-template-columns: 1.08fr 0.92fr;
+            align-items: center;
+            gap: 54px;
+            padding: 66px 0 76px;
+        }
+
+        .kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 12px;
+            border: 1px solid #cfe5da;
+            border-radius: 999px;
+            color: var(--green-dark);
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            font-weight: 750;
+        }
+
+        .kicker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(255, 137, 95, 0.16); }
+
+        h1 {
+            max-width: 720px;
+            margin: 23px 0 18px;
+            font-size: clamp(2.75rem, 6vw, 5.05rem);
+            line-height: 1.1;
+            letter-spacing: -0.065em;
+        }
+
+        h1 .accent { color: var(--green); }
+
+        .hero-copy { max-width: 600px; color: var(--muted); font-size: 1.08rem; }
+
+        .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 29px; }
+
+        .button {
+            display: inline-flex;
+            min-height: 48px;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 0 19px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .button:hover { transform: translateY(-2px); }
+        .button-primary { color: white; background: var(--green); box-shadow: 0 10px 22px rgba(8, 126, 104, 0.2); }
+        .button-primary:hover { background: var(--green-dark); }
+        .button-secondary { border-color: var(--line); color: var(--ink); background: rgba(255,255,255,0.65); }
+
+        .hero-notes { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 23px; color: var(--muted); font-size: 0.86rem; }
+        .hero-notes span::before { content: "✓"; margin-right: 7px; color: var(--green); font-weight: 900; }
+
+        .visual-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 380px;
+            padding: 28px;
+            border: 1px solid rgba(255,255,255,0.82);
+            border-radius: 28px;
+            background: linear-gradient(150deg, #e5f8ed 0%, #d6f1e6 53%, #dfe7ff 100%);
+            box-shadow: var(--shadow);
+        }
+
+        .visual-card::before, .visual-card::after {
+            position: absolute;
+            content: "";
+            border: 1px solid rgba(8, 126, 104, 0.16);
+            border-radius: 50%;
+        }
+
+        .visual-card::before { width: 280px; height: 280px; right: -72px; top: -102px; }
+        .visual-card::after { width: 210px; height: 210px; right: -37px; top: -67px; }
+
+        .visual-label { position: relative; z-index: 1; color: var(--green-dark); font-size: 0.78rem; font-weight: 850; letter-spacing: 0.16em; }
+
+        .loop {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 13px;
+            margin-top: 34px;
+        }
+
+        .loop-step {
+            min-height: 112px;
+            padding: 17px;
+            border: 1px solid rgba(255,255,255,0.78);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(8px);
+        }
+
+        .loop-step:nth-child(2) { transform: translateY(22px); }
+        .loop-step:nth-child(3) { transform: translateY(-5px); }
+        .loop-step:nth-child(4) { transform: translateY(17px); }
+        .loop-num { display: block; margin-bottom: 7px; color: var(--green); font-size: 0.74rem; font-weight: 900; letter-spacing: 0.1em; }
+        .loop-step strong { display: block; font-size: 1.03rem; }
+        .loop-step small { color: var(--muted); }
+
+        .section { padding: 73px 0; }
+        .section-white { background: rgba(255,255,255,0.68); border-top: 1px solid rgba(24,54,56,0.06); border-bottom: 1px solid rgba(24,54,56,0.06); }
+        .section-heading { max-width: 740px; margin-bottom: 31px; }
+        .section-kicker { margin: 0 0 8px; color: var(--green); font-size: 0.76rem; font-weight: 850; letter-spacing: 0.15em; text-transform: uppercase; }
+        h2 { margin: 0; font-size: clamp(1.85rem, 4vw, 2.7rem); line-height: 1.2; letter-spacing: -0.045em; }
+        .section-heading p { margin: 12px 0 0; color: var(--muted); }
+
+        .path-cards, .direction-grid, .challenge-grid, .track-grid, .resource-grid, .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .path-card, .direction-card, .challenge-card, .track-card, .resource-card, .faq-card {
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: var(--card);
+        }
+
+        .path-card { min-height: 210px; padding: 21px; }
+        .card-icon { display: grid; width: 42px; height: 42px; place-items: center; margin-bottom: 18px; border-radius: 13px; color: var(--green-dark); background: var(--mint); font-size: 1.1rem; font-weight: 900; }
+        .path-card:nth-child(2) .card-icon { background: #fff0df; color: #a75424; }
+        .path-card:nth-child(3) .card-icon { background: var(--lavender); color: #5652a0; }
+        .path-card:nth-child(4) .card-icon { background: #ffe6e0; color: #ae4c35; }
+        .path-card h3, .direction-card h3, .challenge-card h3, .track-card h3, .resource-card h3, .faq-card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+        .path-card p, .direction-card p, .challenge-card p, .track-card p, .resource-card p, .faq-card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+        .direction-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .direction-card { position: relative; min-height: 190px; padding: 22px; }
+        .direction-index { display: inline-block; margin-bottom: 15px; color: var(--green); font-size: 0.75rem; font-weight: 900; letter-spacing: 0.1em; }
+        .direction-card .deliverable { display: block; margin-top: 13px; color: var(--ink); font-size: 0.8rem; font-weight: 750; }
+
+        .path-finder {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+            gap: 27px;
+            padding: 27px;
+            border: 1px solid #d7e8dd;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #fff 0%, #f0faf4 100%);
+            box-shadow: var(--shadow);
+        }
+
+        .finder-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px; }
+        .field { display: flex; flex-direction: column; gap: 7px; }
+        .field-full { grid-column: 1 / -1; }
+        .field label, .field legend { color: var(--ink); font-size: 0.88rem; font-weight: 800; }
+        .field select { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid #cbdcd2; border-radius: 9px; color: var(--ink); background: white; font: inherit; font-size: 0.9rem; }
+        fieldset.field { min-width: 0; margin: 0; padding: 0; border: 0; }
+        .checks { display: flex; flex-wrap: wrap; gap: 8px; }
+        .check-option { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: white; font-size: 0.82rem; }
+        .check-option input { accent-color: var(--green); }
+        .finder-submit { justify-self: start; cursor: pointer; font: inherit; }
+
+        .recommendation { display: flex; flex-direction: column; justify-content: center; min-height: 100%; padding: 24px; border-radius: 17px; color: white; background: var(--ink); }
+        .recommendation .result-label { color: #a3d8c0; font-size: 0.75rem; font-weight: 850; letter-spacing: 0.12em; }
+        .recommendation h3 { margin: 8px 0; font-size: 1.45rem; }
+        .recommendation p { margin: 0; color: #c1d2cf; font-size: 0.91rem; }
+        .recommendation ol { margin: 15px 0 0; padding-left: 1.2rem; color: #e3edeb; font-size: 0.87rem; }
+        .recommendation li + li { margin-top: 6px; }
+        .privacy-note { margin: 11px 0 0; color: var(--muted); font-size: 0.78rem; }
+
+        .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; counter-reset: step; }
+        .step { position: relative; min-height: 184px; padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: white; counter-increment: step; }
+        .step::before { display: grid; width: 34px; height: 34px; place-items: center; margin-bottom: 17px; border-radius: 50%; color: white; background: var(--green); content: counter(step, decimal-leading-zero); font-size: 0.72rem; font-weight: 900; }
+        .step h3 { margin: 0 0 7px; font-size: 1rem; }
+        .step p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+        .challenge-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .challenge-card { min-height: 235px; padding: 23px; }
+        .tag { display: inline-block; margin-bottom: 14px; padding: 5px 9px; border-radius: 999px; color: var(--green-dark); background: var(--mint); font-size: 0.73rem; font-weight: 850; }
+        .challenge-card:nth-child(2) .tag { color: #6055a7; background: var(--lavender); }
+        .challenge-card:nth-child(3) .tag { color: #a75424; background: #fff0df; }
+        .challenge-card ul { margin: 13px 0 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.87rem; }
+
+        .track-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .track-card { min-height: 160px; padding: 21px; }
+        .track-card .track-type { display: block; margin-bottom: 9px; color: var(--green); font-size: 0.74rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+
+        .contribution {
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 30px;
+            align-items: center;
+            padding: 31px;
+            border-radius: 22px;
+            color: white;
+            background: var(--ink);
+        }
+
+        .contribution h2 { color: white; }
+        .contribution p { color: #c5d4d1; }
+        .contribution-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .contribution-item { padding: 13px 14px; border: 1px solid rgba(255,255,255,0.14); border-radius: 11px; color: #e1efeb; background: rgba(255,255,255,0.06); font-size: 0.88rem; }
+
+        .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .resource-card { min-height: 160px; padding: 21px; }
+        .resource-card a { color: var(--green-dark); font-weight: 800; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+        .resource-meta { display: block; margin-bottom: 9px; color: var(--green); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+
+        .faq-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .faq-card { padding: 20px; }
+
+        .join-panel { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 27px; border: 1px solid #cfe5da; border-radius: 20px; background: var(--mint); }
+        .join-panel h2 { font-size: clamp(1.55rem, 3vw, 2.1rem); }
+        .join-panel p { margin: 8px 0 0; color: #436660; }
+        .join-panel .button { flex: 0 0 auto; color: white; }
+
+        footer { padding: 27px 0 37px; color: var(--muted); font-size: 0.85rem; }
+        .footer-inner { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); padding-top: 21px; }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr 0.85fr; gap: 25px; }
+            .path-cards, .track-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .direction-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .path-finder { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 680px) {
+            .shell { width: min(100% - 28px, 560px); }
+            .topbar { min-height: 70px; }
+            .nav { gap: 12px; }
+            .nav a:not(.home-link) { display: none; }
+            .nav .home-link { padding: 7px 10px; font-size: 0.8rem; }
+            .hero { min-height: auto; grid-template-columns: 1fr; gap: 32px; padding: 50px 0 55px; }
+            h1 { max-width: 580px; font-size: clamp(2.65rem, 12vw, 4.2rem); }
+            .hero-copy { font-size: 1rem; }
+            .visual-card { min-height: 350px; padding: 22px; }
+            .loop-step { min-height: 100px; padding: 14px; }
+            .section { padding: 55px 0; }
+            .path-cards, .direction-grid, .challenge-grid, .track-grid, .resource-grid, .faq-grid, .steps { grid-template-columns: 1fr; }
+            .path-card, .direction-card, .challenge-card, .track-card, .step { min-height: auto; }
+            .path-finder { padding: 18px; }
+            .finder-form { grid-template-columns: 1fr; }
+            .field-full { grid-column: auto; }
+            .recommendation { min-height: 250px; }
+            .contribution { grid-template-columns: 1fr; padding: 23px; }
+            .contribution-list { grid-template-columns: 1fr; }
+            .join-panel { align-items: flex-start; flex-direction: column; }
+            .footer-inner { flex-direction: column; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="shell topbar">
+        <a class="brand" href="#top" aria-label="AgentLab 首页">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span><span class="brand-name">AGENTLAB</span><span class="brand-sub">BUILD · EXPLORE · RESEARCH</span></span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+            <a href="#directions">探索方向</a>
+            <a href="#pathfinder">找到起点</a>
+            <a href="#join">加入方式</a>
+            <a class="home-link" href="../">杨军港主页 ↗</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="shell hero" aria-labelledby="hero-title">
+            <div>
+                <div class="kicker"><span class="kicker-dot" aria-hidden="true"></span>面向本科生的 AI Agent 科研与创新入口</div>
+                <h1 id="hero-title">从第一个 <span class="accent">Agent</span>，走向真正属于你的 AI 项目。</h1>
+                <p class="hero-copy">探索智能体、构建应用、研究前沿问题，或把一个有趣想法做成作品。你可以从现在的课程和基础出发，和伙伴一起一步步做出来。</p>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#pathfinder">找到适合我的起点 <span aria-hidden="true">↓</span></a>
+                    <a class="button button-secondary" href="#join">了解如何加入</a>
+                </div>
+                <div class="hero-notes">
+                    <span>不要求科研经历</span>
+                    <span>不必先精通数学</span>
+                    <span>从小任务开始</span>
+                </div>
+            </div>
+            <div class="visual-card" aria-label="Agent 项目迭代流程：提出问题、构建、观察结果、改进">
+                <div class="visual-label">YOUR FIRST PROJECT LOOP</div>
+                <div class="loop">
+                    <div class="loop-step"><span class="loop-num">01 · ASK</span><strong>提出问题</strong><small>从好奇心找到起点</small></div>
+                    <div class="loop-step"><span class="loop-num">02 · BUILD</span><strong>动手构建</strong><small>先做一个能运行的版本</small></div>
+                    <div class="loop-step"><span class="loop-num">03 · OBSERVE</span><strong>观察结果</strong><small>记录成功，也记录失败</small></div>
+                    <div class="loop-step"><span class="loop-num">04 · IMPROVE</span><strong>继续迭代</strong><small>让每次尝试都有积累</small></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="ways">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Find your way in</p>
+                    <h2>不管你喜欢哪种学习方式，都能找到入口。</h2>
+                    <p>从动手写代码、读论文，到做产品和参加竞赛，AgentLab 鼓励不同背景的同学从适合自己的任务开始。</p>
+                </div>
+                <div class="path-cards">
+                    <article class="path-card"><div class="card-icon" aria-hidden="true">↗</div><h3>Explore · 探索</h3><p>先理解 Agent 如何接收任务、调用工具并根据反馈继续行动。</p></article>
+                    <article class="path-card"><div class="card-icon" aria-hidden="true">⌘</div><h3>Build · 构建</h3><p>做出一个能解决小问题的智能应用，练习编程、协作和交付。</p></article>
+                    <article class="path-card"><div class="card-icon" aria-hidden="true">◎</div><h3>Research · 科研</h3><p>从复现和观察开始，学习提出问题、设计实验、分析证据。</p></article>
+                    <article class="path-card"><div class="card-icon" aria-hidden="true">✳</div><h3>Create · 创新</h3><p>把创意变成原型，尝试竞赛、大学生创新项目或产品验证。</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="directions">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Explore the possibilities</p>
+                    <h2>可以探索哪些 Agent 方向？</h2>
+                    <p>这里介绍的是公开方向和项目类型。具体研究问题会在完成入门、匹配项目后再讨论；尚未公开的 Idea 不会放在网站上。</p>
+                </div>
+                <div class="direction-grid">
+                    <article class="direction-card"><span class="direction-index">01 / BUILD</span><h3>Agent Builder</h3><p>让 AI 使用工具、获取信息并完成实际任务。</p><span class="deliverable">可能的成果：智能应用、开源工具</span></article>
+                    <article class="direction-card"><span class="direction-index">02 / CODE</span><h3>Coding Agent</h3><p>探索 AI 如何理解代码、修复问题、测试和协助软件开发。</p><span class="deliverable">可能的成果：开发工具、系统评测</span></article>
+                    <article class="direction-card"><span class="direction-index">03 / COLLABORATE</span><h3>Multi-Agent</h3><p>研究多个智能体如何分工、协作、沟通并完成任务。</p><span class="deliverable">可能的成果：协作系统、算法实验</span></article>
+                    <article class="direction-card"><span class="direction-index">04 / PROTECT</span><h3>Agent Security</h3><p>当 AI 能调用工具和执行操作，怎样让它安全、可靠、可控？</p><span class="deliverable">可能的成果：安全测评、检测工具</span></article>
+                    <article class="direction-card"><span class="direction-index">05 / DISCOVER</span><h3>Agent for Science</h3><p>探索智能体怎样帮助科学研究、数据分析和真实系统。</p><span class="deliverable">可能的成果：科研工具、仿真原型</span></article>
+                    <article class="direction-card"><span class="direction-index">06 / INVENT</span><h3>AI Innovation</h3><p>把感兴趣的问题变成可体验、可验证的 Agent 创意。</p><span class="deliverable">可能的成果：竞赛作品、大创项目</span></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="pathfinder">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Find your starting point</p>
+                    <h2>用一分钟，看看可以从哪里开始。</h2>
+                    <p>年级帮助安排节奏，实际起点会结合你学过什么、喜欢做什么，以及每周能投入多少时间。</p>
+                </div>
+                <div class="path-finder">
+                    <form class="finder-form" id="path-form">
+                        <div class="field">
+                            <label for="grade">你现在是几年级？</label>
+                            <select id="grade" name="grade"><option value="大一">大一</option><option value="大二" selected>大二</option><option value="大三">大三</option><option value="大四">大四</option><option value="其他">其他</option></select>
+                        </div>
+                        <div class="field">
+                            <label for="hours">每周大约能投入多少时间？</label>
+                            <select id="hours" name="hours"><option value="2–4 小时">2–4 小时</option><option value="4–6 小时" selected>4–6 小时</option><option value="6–10 小时">6–10 小时</option><option value="10 小时以上">10 小时以上</option></select>
+                        </div>
+                        <fieldset class="field field-full">
+                            <legend>你已经接触过哪些内容？（可多选）</legend>
+                            <div class="checks">
+                                <label class="check-option"><input type="checkbox" name="skill" value="code"> Python / 编程</label>
+                                <label class="check-option"><input type="checkbox" name="skill" value="algo"> 数据结构 / 算法</label>
+                                <label class="check-option"><input type="checkbox" name="skill" value="ml"> 机器学习 / 深度学习</label>
+                                <label class="check-option"><input type="checkbox" name="skill" value="security"> 网络 / 信息安全</label>
+                                <label class="check-option"><input type="checkbox" name="skill" value="none"> 还没有相关基础</label>
+                            </div>
+                        </fieldset>
+                        <div class="field">
+                            <label for="interest">你更喜欢做什么？</label>
+                            <select id="interest" name="interest"><option value="build">动手写代码</option><option value="research">读论文、分析问题</option><option value="algorithm">算法与数学</option><option value="product">做产品、参加竞赛</option><option value="unsure" selected>还不确定</option></select>
+                        </div>
+                        <div class="field">
+                            <label for="goal">你最希望获得什么？</label>
+                            <select id="goal" name="goal"><option value="demo">做出一个作品</option><option value="research">学习科研方法</option><option value="paper">尝试论文研究</option><option value="competition">参加竞赛 / 大创</option><option value="unsure" selected>暂时还不确定</option></select>
+                        </div>
+                        <button class="button button-primary finder-submit field-full" type="submit">给我一条起步建议 <span aria-hidden="true">→</span></button>
+                    </form>
+                    <aside class="recommendation" id="recommendation" aria-live="polite">
+                        <span class="result-label">YOUR STARTING ROUTE</span>
+                        <h3>先从 Explorer 开始</h3>
+                        <p>完成一个短小的 Agent 入门挑战，熟悉“任务—工具—反馈”的基本流程，再选择更适合你的路线。</p>
+                        <ol><li>第 1 周：了解 Agent 的基本结构</li><li>第 2 周：完成一个小型可运行 Demo</li><li>第 3 周：记录一次失败并尝试改进</li></ol>
+                    </aside>
+                </div>
+                <p class="privacy-note">这只是路线建议，不是选拔测试。你的选择只在当前浏览器中用于生成结果，不会被提交或保存。</p>
+            </div>
+        </section>
+
+        <section class="section" id="join">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">How to join</p>
+                    <h2>先了解，再动手，然后一起匹配项目。</h2>
+                    <p>加入流程先关注学习和投入，不用绩点或论文经历给大一、大二同学设门槛。</p>
+                </div>
+                <div class="steps">
+                    <article class="step"><h3>了解 AgentLab</h3><p>浏览方向和入门资料，想清楚自己喜欢什么、目前会什么。</p></article>
+                    <article class="step"><h3>完成入门挑战</h3><p>选择一个 7–14 天的小任务，提交代码、实验记录或作品说明。</p></article>
+                    <article class="step"><h3>交流与匹配</h3><p>根据兴趣、课程基础、时间投入和任务完成情况，一起选择起点。</p></article>
+                    <article class="step"><h3>加入项目迭代</h3><p>从清晰的里程碑开始，持续记录、复盘和分享可复用成果。</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="starter">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Starter challenge · 7–14 days</p>
+                    <h2>选一个小挑战，做出可以展示的第一步。</h2>
+                    <p>不要求训练模型，也不要求购买 API。挑战重点是把任务做完、说明过程、讲清楚哪里有效和哪里失败。</p>
+                </div>
+                <div class="challenge-grid">
+                    <article class="challenge-card"><span class="tag">BUILD CHALLENGE</span><h3>做一个工具调用 Agent</h3><p>让 Agent 使用一个简单工具完成一个明确任务。</p><ul><li>提交可运行代码和 README</li><li>说明工具输入、输出和边界</li></ul></article>
+                    <article class="challenge-card"><span class="tag">RESEARCH CHALLENGE</span><h3>复现一个小实验</h3><p>读懂公开工作中的一个可验证结论，做一组对照实验。</p><ul><li>提交实验记录和结果图表</li><li>写下一个失败案例或疑问</li></ul></article>
+                    <article class="challenge-card"><span class="tag">CREATIVE CHALLENGE</span><h3>把创意变成 Demo</h3><p>选一个学习、生活或专业场景，做一个最小可用原型。</p><ul><li>提交 Demo 或演示记录</li><li>说明目标用户和下一步改进</li></ul></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="growth">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Grow at your own pace</p>
+                    <h2>年级给建议，能力和兴趣决定从哪里做起。</h2>
+                    <p>学生可以在不同阶段进入或调整路线。一个大二同学可以直接做研究，一个大三同学也可以从基础工程任务开始。</p>
+                </div>
+                <div class="track-grid">
+                    <article class="track-card"><span class="track-type">L0 · Explorer</span><h3>认识 Agent，完成挑战</h3><p>建立概念，练习 Git 和基本开发环境，交付一个小作品。</p></article>
+                    <article class="track-card"><span class="track-type">L1 · Builder</span><h3>独立完成一个项目</h3><p>把工具、模型和环境连接起来，做出可复现的 Demo。</p></article>
+                    <article class="track-card"><span class="track-type">L2 · Researcher</span><h3>复现、观察、提出问题</h3><p>搭建基线，设计实验，依据证据判断一个方向是否值得继续。</p></article>
+                    <article class="track-card"><span class="track-type">L3 · Contributor</span><h3>带着团队持续迭代</h3><p>主导项目任务、维护公共工具，帮助下一位同学更快起步。</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="outcomes">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Many ways to make progress</p>
+                    <h2>项目成果不只是一篇论文。</h2>
+                    <p>做出可验证、可复用的成果，再决定是否继续升级成更深入的研究或创新项目。</p>
+                </div>
+                <div class="track-grid">
+                    <article class="track-card"><span class="track-type">Research</span><h3>研究路线</h3><p>论文、实验平台、研究报告。</p></article>
+                    <article class="track-card"><span class="track-type">Engineering</span><h3>工程路线</h3><p>开源项目、公共工具、系统 Demo。</p></article>
+                    <article class="track-card"><span class="track-type">Competition</span><h3>竞赛路线</h3><p>竞赛作品、创新实践和团队协作。</p></article>
+                    <article class="track-card"><span class="track-type">Innovation</span><h3>创新路线</h3><p>大创项目、产品原型和用户验证。</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="community">
+            <div class="shell contribution">
+                <div>
+                    <p class="section-kicker">Built together</p>
+                    <h2>每个人完成项目，也为后来者留下一点东西。</h2>
+                    <p>公共教程、代码模板、实验经验和项目复盘会逐步沉淀，成为下一位同学的起点。网站只展示已获准公开的成果。</p>
+                </div>
+                <div class="contribution-list">
+                    <div class="contribution-item">补充教程与入门示例</div>
+                    <div class="contribution-item">维护共用代码和工具</div>
+                    <div class="contribution-item">记录实验流程与复现经验</div>
+                    <div class="contribution-item">帮助新同学完成第一步</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="resources">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">A few good places to begin</p>
+                    <h2>先看少量可靠材料，再边做边补。</h2>
+                    <p>建议从第一项开始。其余内容按需打开，不需要一次读完整个领域。</p>
+                </div>
+                <div class="resource-grid">
+                    <article class="resource-card"><span class="resource-meta">Beginner · Chinese</span><h3><a href="https://huggingface.co/learn/agents-course/zh-CN/unit1/introduction" target="_blank" rel="noopener noreferrer">Hugging Face：智能体入门课程</a></h3><p>从 Agent、工具、思考—行动—观察循环开始，并动手构建第一个智能体。</p></article>
+                    <article class="resource-card"><span class="resource-meta">Design · English</span><h3><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">Anthropic：Building effective agents</a></h3><p>理解工作流与 Agent 的区别，学习从简单、可组合的系统开始。</p></article>
+                    <article class="resource-card"><span class="resource-meta">Security · 2026</span><h3><a href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noopener noreferrer">OWASP：Agentic Applications Top 10</a></h3><p>把安全方向与 Agent 行为、工具使用、权限和系统边界联系起来。</p></article>
+                    <article class="resource-card"><span class="resource-meta">Optional · Protocol</span><h3><a href="https://modelcontextprotocol.io/specification/2026-07-28" target="_blank" rel="noopener noreferrer">Model Context Protocol（MCP）规范</a></h3><p>了解 Agent 应用如何连接外部工具和数据；建议完成第一个 Demo 后再看。</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="faq">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Questions students often ask</p>
+                    <h2>你可能还想知道。</h2>
+                </div>
+                <div class="faq-grid">
+                    <article class="faq-card"><h3>我没有科研经历，可以申请吗？</h3><p>可以。先从入门挑战开始，我们更关注持续投入、完成任务和主动复盘。</p></article>
+                    <article class="faq-card"><h3>我必须会很多数学吗？</h3><p>不需要。不同项目需要的基础不同，可以从编程、产品或实验任务开始。</p></article>
+                    <article class="faq-card"><h3>刚加入就会分配论文 Idea 吗？</h3><p>先通过小任务了解兴趣和基础，再一起匹配项目。未公开的研究问题会在内部讨论。</p></article>
+                    <article class="faq-card"><h3>每周需要投入多少时间？</h3><p>可以先从每周 2–4 小时开始。实际任务会根据你的学期安排协商确定。</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="shell section" style="padding-top:0;" aria-labelledby="join-title">
+            <div class="join-panel">
+                <div>
+                    <h2 id="join-title">准备好开始你的第一个小项目了吗？</h2>
+                    <p>来信时简单介绍年级、专业、学过的内容、感兴趣的方向和每周可投入时间即可。请勿发送身份证号等敏感信息。</p>
+                </div>
+                <a class="button button-primary" href="mailto:yangjungang@shu.edu.cn?subject=AgentLab%20%E5%8A%A0%E5%85%A5%E5%92%A8%E8%AF%A2">邮件联系 ↗</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="shell">
+        <div class="footer-inner">
+            <span>AgentLab · Shanghai University</span>
+            <span>先探索，再动手；从一个小问题开始。</span>
+            <a href="../">返回杨军港个人主页</a>
+        </div>
+    </footer>
+
+    <script>
+        const routeDetails = {
+            explorer: {
+                title: "先从 Explorer 开始",
+                copy: "先熟悉 Agent 的基本流程，做出一个可运行的小 Demo，再决定想继续学什么。",
+                plan: ["第 1 周：了解 Agent、工具和反馈循环", "第 2 周：完成入门挑战中的一个小任务", "第 3 周：记录一次失败并尝试改进"]
+            },
+            builder: {
+                title: "推荐路线：Agent Builder",
+                copy: "你可以把编程基础用在工具调用、Agent 应用和软件工程任务上。先交付小系统，再逐步增加功能。",
+                plan: ["第 1 周：读入门材料并运行示例", "第 2 周：增加一个自己设计的工具", "第 3–4 周：写 README、测试并提交改进"]
+            },
+            research: {
+                title: "推荐路线：Research Explorer",
+                copy: "从一篇易读论文或一个公开基线开始，练习提出问题和验证证据。第一步不需要原创算法。",
+                plan: ["第 1 周：选定一个小问题，读一篇入门材料", "第 2 周：跑通公开示例或基线", "第 3–4 周：做一组对照并写下观察"]
+            },
+            security: {
+                title: "推荐路线：Agent Security Builder",
+                copy: "可以从一个受控、无真实数据的小型 Agent 开始，观察工具权限、输入和执行边界。",
+                plan: ["第 1 周：理解 Agent 如何调用工具", "第 2 周：搭建一个隔离的玩具场景", "第 3–4 周：记录风险案例并验证保护措施"]
+            },
+            create: {
+                title: "推荐路线：AI Innovation",
+                copy: "从一个具体用户问题出发，先做最小原型，再验证它是否真的有用。",
+                plan: ["第 1 周：描述用户和要解决的问题", "第 2 周：画出交互流程并做最小 Demo", "第 3–4 周：找同学试用并记录改进"]
+            }
+        };
+
+        document.getElementById("path-form").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const values = new FormData(form);
+            const skills = values.getAll("skill");
+            const interest = values.get("interest");
+            const goal = values.get("goal");
+            let route = "explorer";
+
+            if (goal === "paper" || goal === "research" || interest === "research" || interest === "algorithm") {
+                route = "research";
+            } else if (goal === "competition" || interest === "product") {
+                route = "create";
+            } else if (skills.includes("security")) {
+                route = "security";
+            } else if (skills.includes("code") || skills.includes("algo") || interest === "build") {
+                route = "builder";
+            }
+
+            const details = routeDetails[route];
+            const result = document.getElementById("recommendation");
+            result.querySelector("h3").textContent = details.title;
+            result.querySelector("p").textContent = `${values.get("grade")} · 每周 ${values.get("hours")}。${details.copy}`;
+            const list = result.querySelector("ol");
+            list.replaceChildren(...details.plan.map((item) => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                return li;
+            }));
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="zh" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,6 +57,8 @@
         .header-controls {
             display: flex;
             gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .btn-switch {
@@ -72,6 +74,18 @@
 
         .btn-switch:hover {
             opacity: 0.8;
+        }
+
+        .agentlab-nav {
+            background: var(--secondary);
+            color: #fff;
+            border-color: var(--secondary);
+            font-weight: 700;
+        }
+
+        .agentlab-nav:hover {
+            color: #fff;
+            opacity: 0.9;
         }
 
         .profile {
@@ -93,6 +107,51 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
+        }
+
+        .agentlab-callout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            padding: 1.75rem 2rem;
+            border: 1px solid rgba(52, 152, 219, 0.25);
+            border-radius: 12px;
+            background: linear-gradient(115deg, rgba(52, 152, 219, 0.11), rgba(46, 204, 113, 0.08));
+        }
+
+        .agentlab-callout h2 {
+            margin: 0.2rem 0 0.5rem;
+        }
+
+        .agentlab-callout p {
+            max-width: 720px;
+        }
+
+        .agentlab-callout .eyebrow {
+            color: var(--secondary);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .agentlab-cta {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.15rem;
+            border-radius: 8px;
+            background: var(--secondary);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .agentlab-cta:hover {
+            color: #fff;
+            filter: brightness(0.95);
         }
 
         section {
@@ -144,7 +203,13 @@
             }
             .header-controls {
                 width: 100%;
-                justify-content: flex-end;
+                justify-content: flex-start;
+            }
+            .agentlab-callout {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.4rem;
             }
         }
     </style>
@@ -157,6 +222,10 @@
                 <span class="zh">杨军港</span>
             </h1>
             <div class="header-controls">
+                <a class="btn-switch agentlab-nav" href="./agentlab/">
+                    <span class="en">AgentLab for Students</span>
+                    <span class="zh">本科生 AgentLab</span>
+                </a>
                 <div class="btn-switch" onclick="toggleLang()" id="langBtn">中/En</div>
                 <div class="btn-switch" onclick="toggleTheme()">🌓</div>
             </div>
@@ -192,18 +261,36 @@
             </div>
         </div>
 
+        <section class="agentlab-callout" aria-labelledby="agentlab-title">
+            <div>
+                <div class="eyebrow">For Undergraduate Students</div>
+                <h2 id="agentlab-title">
+                    <span class="en">Start exploring AI agents with AgentLab</span>
+                    <span class="zh">从第一个智能体开始探索 AI</span>
+                </h2>
+                <p>
+                    <span class="en">A welcoming path into AI agent projects, research, engineering, competitions, and creative ideas. No prior research experience is required.</span>
+                    <span class="zh">面向本科生的 Agent 科研与创新入口。你可以从一个小任务开始，逐步探索科研、工程、竞赛或创意项目；不要求已有科研经历。</span>
+                </p>
+            </div>
+            <a class="agentlab-cta" href="./agentlab/">
+                <span class="en">Explore AgentLab →</span>
+                <span class="zh">了解如何开始 →</span>
+            </a>
+        </section>
+
         <section id="about">
             <h2>
                 <span class="en">About Me</span>
                 <span class="zh">个人简介</span>
             </h2>
             <div class="en">
-                <p>Currently an assistant professor at Shanghai University. Obtained Ph.D. in Computer Science from Shanghai Jiao Tong University (2024) under Prof. <a href="https://xiangliyao.cn">Liyao Xiang (向立瑶)</a>. Obtained M.S. in Mathematics from Nanjing University of Science and Technology (2019). Research focuses on differential privacy, adversarial learning, and federated learning.</p>
-                <p style="margin-top:1rem;">🔬 Undergraduate students interested in  AI security, data security, differential privacy, adversarial learning, and federated learning research are welcome to contact via email or WeChat! If you are interested in doing a project or a thesis, please contact me first.<br><em>(Note: Quota for 2025/2026 Master students is full)</em></p>
+                <p>Currently an assistant professor at Shanghai University. Obtained Ph.D. in Computer Science from Shanghai Jiao Tong University (2024) under Prof. <a href="https://xiangliyao.cn">Liyao Xiang (向立瑶)</a>. Obtained M.S. in Mathematics from Nanjing University of Science and Technology (2019). My research explores trustworthy AI and data security, with growing interest in AI agents and agent security, alongside differential privacy, adversarial learning, and federated learning.</p>
+                <p style="margin-top:1rem;">🔬 Undergraduate students interested in AI agents, AI security, data security, or intelligent applications can start with <a href="./agentlab/">AgentLab</a>. No prior research experience is required; begin with a small challenge and find a project path that fits your background and interests.<br><em>(Note: Quota for 2025/2026 Master students is full)</em></p>
             </div>
             <div class="zh">
-                <p>上海大学计算机工程与科学学院助理教授。2024年于上海交通大学获得计算机科学博士学位，师从<a href="https://xiangliyao.cn">向立瑶教授</a>，2019 年本科毕业于南京大学数学系。主要研究方向包括数据安全、差分隐私、对抗学习和联邦学习。</p>
-                <p style="margin-top:1rem;">🔬 欢迎对人工智能安全、数据隐私保护、差分隐私研究感兴趣的本科生通过邮件或微信联系！推荐考研或者保研的同学需要做毕业设计的提前联系，灵活定制毕设课题。<br><em>（注：目前 25、26 级硕士已招完）</em></p>
+                <p>上海大学计算机工程与科学学院助理教授。2024年于上海交通大学获得计算机科学博士学位，师从<a href="https://xiangliyao.cn">向立瑶教授</a>，2019 年本科毕业于南京大学数学系。研究关注可信人工智能与数据安全，正在拓展人工智能智能体及其安全方向，同时继续开展差分隐私、对抗学习和联邦学习相关研究。</p>
+                <p style="margin-top:1rem;">🔬 对 AI 智能体、人工智能安全、数据安全或智能应用感兴趣的本科生，可以从 <a href="./agentlab/">AgentLab</a> 开始。不要求已有科研经历，先完成一个小挑战，再根据基础和兴趣匹配项目。<br><em>（注：目前 25、26 级硕士已招完）</em></p>
             </div>
         </section>
 
@@ -214,20 +301,20 @@
             </h2>
             <ul style="columns:2; list-style:none;">
                 <li>
-                    <span class="en">• Data Security</span>
-                    <span class="zh">• 数据安全 (Data Security)</span>
+                    <span class="en">• AI Agents and Agent Security</span>
+                    <span class="zh">• 人工智能智能体与智能体安全</span>
+                </li>
+                <li>
+                    <span class="en">• Data Security and Privacy</span>
+                    <span class="zh">• 数据安全与隐私保护</span>
                 </li>
                 <li>
                     <span class="en">• Differential Privacy</span>
-                    <span class="zh">• 差分隐私 (Differential Privacy)</span>
+                    <span class="zh">• 差分隐私</span>
                 </li>
                 <li>
-                    <span class="en">• Adversarial Learning</span>
-                    <span class="zh">• 对抗学习 (Adversarial Learning)</span>
-                </li>
-                <li>
-                    <span class="en">• Federated Learning</span>
-                    <span class="zh">• 联邦学习 (Federated Learning)</span>
+                    <span class="en">• Adversarial and Federated Learning</span>
+                    <span class="zh">• 对抗学习与联邦学习</span>
                 </li>
             </ul>
         </section>
@@ -318,7 +405,7 @@
 
             // 初始化语言
             const savedLang = localStorage.getItem('lang');
-            // 如果本地有存语言设置，则使用；否则默认使用英语 (en)
+            // 如果本地有存语言设置，则使用；否则默认使用中文 (zh)
             if (savedLang) {
                 document.documentElement.setAttribute('lang', savedLang);
             }
