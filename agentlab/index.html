@@ -330,6 +330,46 @@
             html { scroll-behavior: auto; }
             *, *::before, *::after { transition-duration: 0.01ms !important; }
         }
+
+        /* 新增 */
+        /* ===== 本科实验卡片 ===== */
+        .lab-card {
+            display: flex;
+            flex-direction: column;
+            color: inherit;
+            text-decoration: none;
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+
+        a.lab-card:hover {
+            transform: translateY(-3px);
+            border-color: #b9d8c9;
+            text-decoration: none;
+        }
+
+        .lab-card .lab-cta {
+            margin-top: auto;
+            padding-top: 14px;
+            color: var(--green-dark);
+            font-size: 0.85rem;
+            font-weight: 850;
+        }
+
+        .challenge-card.lab-placeholder {
+            border-style: dashed;
+            background: rgba(255, 255, 255, 0.55);
+            box-shadow: none;
+        }
+
+        .challenge-card.lab-placeholder .tag {
+            color: var(--muted);
+            background: #eef2f0;
+        }
+
+        .challenge-card.lab-placeholder .lab-cta {
+            color: var(--muted);
+        }
+
     </style>
 </head>
 <body>
@@ -341,6 +381,7 @@
         <nav class="nav" aria-label="主导航">
             <a href="demo.html">先试一个 Demo</a>
             <a href="learn.html">LLM → Agent 学习路线</a>
+            <a href="#labs">本科实验</a>
             <a href="#directions">探索方向</a>
             <a href="#pathfinder">找到起点</a>
             <a href="#join">加入方式</a>
@@ -487,6 +528,54 @@
                     <article class="challenge-card"><span class="tag">BUILD · 可选</span><h3>给小 Demo 加一个工具</h3><p>比如让它查一份公开说明，再把结果整理给你。</p><ul><li>先用固定示例数据就可以</li><li>有兴趣时再接入真实模型</li></ul></article>
                     <article class="challenge-card"><span class="tag">EXPLORE · 可选</span><h3>观察一次 Agent 的选择</h3><p>看看它读到了什么、尝试做什么，以及程序允许了什么。</p><ul><li>可以只写下一条观察</li><li>也可以带着问题来交流</li></ul></article>
                     <article class="challenge-card"><span class="tag">CREATE · 可选</span><h3>把熟悉的问题做成原型</h3><p>从课程、校园生活或自己的专业里挑一个小场景。</p><ul><li>纸上画流程也算开始</li><li>不需要先把想法想成熟</li></ul></article>
+                </div>
+            </div>
+        </section>
+
+        <!-- 新增任务 -->
+        <section class="section" id="labs">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Labs · 本科实验</p>
+                    <h2>从一次能做完的小实验开始。</h2>
+                    <p>每个实验都有引导、示例和一份明确的任务。先玩一下，再决定要不要继续往下做。</p>
+                </div>
+                <div class="challenge-grid">
+                    <a class="challenge-card lab-card" href="../labs/CanaryLab/beginner.html">
+                        <span class="tag">安全 · 可参与</span>
+                        <h3>Canary 越狱小实验</h3>
+                        <p>先玩三局泄露判断，再看懂四种越狱话术，最后完成一个 6 条用例的对照实验。</p>
+                        <ul>
+                            <li>约 20 分钟看懂</li>
+                            <li>任务约 3-5 小时</li>
+                            <li>需要基础 Python</li>
+                        </ul>
+                        <span class="lab-cta">进入实验 →</span>
+                    </a>
+
+                    <a class="challenge-card lab-card" href="../labs/IoTLab/index.html">
+                        <span class="tag">安全 · 可参与</span>
+                        <h3>IoT Agent 工具调用实验</h3>
+                        <p>观察外部设备描述会不会让智能家居 Agent 开错灯，完成 normal、injected 和厨房灯边界的对照。</p>
+                        <ul>
+                            <li>约 3-5 小时</li>
+                            <li>需要基础 Python</li>
+                            <li>模拟设备，不连接真实硬件</li>
+                        </ul>
+                        <span class="lab-cta">进入实验 →</span>
+                    </a>
+
+                    <a class="challenge-card lab-card" href="../labs/CalendarLab/index.html">
+                        <span class="tag">安全 · 可参与</span>
+                        <h3>Agent 错误工具调用纠正</h3>
+                        <p>观察 Agent 选错日程时，执行前检查能否拦截，以及安全提醒能否帮助它重新选对。</p>
+                        <ul>
+                            <li>约一周的一项小任务</li>
+                            <li>需要基础 Python</li>
+                            <li>模拟日历，不连接真实日程</li>
+                        </ul>
+                        <span class="lab-cta">进入实验 →</span>
+                    </a>
                 </div>
             </div>
         </section>
