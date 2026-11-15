@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agent 轨迹投毒侦探：在 Agent 训练示范轨迹中找出可疑的工具调用，并对照两个模拟数据来源。">
+    <meta name="theme-color" content="#f4f7f4">
+    <title>Agent 轨迹投毒侦探 | AgentLab 本科实验</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #183638;
+            --muted: #5d7270;
+            --paper: #f4f7f4;
+            --card: #ffffff;
+            --line: #dce7e1;
+            --green: #087e68;
+            --green-dark: #075e52;
+            --mint: #d9f4e7;
+            --orange: #ff895f;
+            --lavender: #e9e8ff;
+            --shadow: 0 20px 60px rgba(25, 59, 52, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        [id] { scroll-margin-top: 18px; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 88% 2%, rgba(217, 244, 231, 0.8), transparent 24rem),
+                var(--paper);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.7;
+            letter-spacing: 0;
+        }
+
+        a { color: inherit; }
+        a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+            outline: 3px solid var(--orange);
+            outline-offset: 3px;
+        }
+
+        .shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+
+        .topbar {
+            display: flex;
+            min-height: 80px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            border-bottom: 1px solid rgba(24, 54, 56, 0.1);
+        }
+        .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand-mark {
+            display: grid;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            border-radius: 13px 13px 13px 4px;
+            color: white;
+            background: var(--green);
+            font-size: 0.8rem;
+            font-weight: 900;
+        }
+        .brand-name { display: block; font-size: 1.02rem; font-weight: 850; }
+        .brand-sub { display: block; margin-top: -3px; color: var(--muted); font-size: 0.7rem; font-weight: 600; }
+        .nav { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+        .nav a { color: var(--muted); font-size: 0.86rem; font-weight: 650; text-decoration: none; }
+        .nav a:hover { color: var(--green); }
+        .nav .home-link { padding: 9px 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.04fr 0.96fr;
+            align-items: stretch;
+            gap: 44px;
+            padding: 54px 0 34px;
+        }
+        .hero > div:first-child { display: flex; flex-direction: column; justify-content: center; }
+        .kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            align-self: flex-start;
+            padding: 7px 12px;
+            border: 1px solid #cfe5da;
+            border-radius: 999px;
+            color: var(--green-dark);
+            background: rgba(255, 255, 255, 0.72);
+            font-size: 0.8rem;
+            font-weight: 750;
+        }
+        .kicker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(255, 137, 95, 0.16); }
+        h1 { margin: 21px 0 16px; max-width: 660px; font-size: 3.2rem; line-height: 1.16; }
+        h1 .accent { color: var(--green); }
+        #hero-title .accent { white-space: nowrap; }
+        .hero-copy { max-width: 600px; color: var(--muted); font-size: 1.02rem; }
+        .hero-sub { margin: 12px 0 0; color: var(--green-dark); font-size: 0.94rem; font-weight: 750; }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 24px; }
+
+        .button {
+            display: inline-flex;
+            min-height: 47px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 18px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font: inherit;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease;
+        }
+        .button:hover { transform: translateY(-2px); }
+        .button-primary { color: white; background: var(--green); box-shadow: 0 10px 22px rgba(8, 126, 104, 0.2); }
+        .button-primary:hover { background: var(--green-dark); }
+        .button-secondary { border-color: var(--line); color: var(--ink); background: rgba(255,255,255,0.78); }
+
+        .hero-notes { display: flex; flex-wrap: wrap; gap: 8px 17px; margin-top: 20px; color: var(--muted); font-size: 0.85rem; }
+        .hero-notes span::before { content: "✓"; margin-right: 6px; color: var(--green); font-weight: 900; }
+
+        .toc-strip { padding: 0 0 40px; }
+        .toc { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 18px; border-top: 1px solid rgba(24, 54, 56, 0.08); }
+        .toc-label { align-self: center; margin-right: 4px; color: var(--muted); font-size: 0.76rem; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; }
+        .toc a {
+            padding: 8px 13px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 0.82rem;
+            font-weight: 750;
+            text-decoration: none;
+        }
+        .toc a:hover { border-color: #b9d8c9; color: var(--green); }
+
+        .console {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 21px;
+            border: 1px solid rgba(255,255,255,0.86);
+            border-radius: 26px;
+            background: linear-gradient(155deg, #e7f8ee 0%, #d8f1e6 55%, #e4e7ff 100%);
+            box-shadow: var(--shadow);
+        }
+        .console-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .console-title { color: var(--green-dark); font-size: 0.74rem; font-weight: 900; }
+        .sim-badge { padding: 3px 8px; border-radius: 999px; color: #a14428; background: rgba(255,137,95,0.18); font-size: 0.66rem; font-weight: 850; }
+        .hero-task { margin-top: 12px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.9); border-radius: 10px; background: rgba(255,255,255,0.82); font-size: 0.82rem; font-weight: 700; }
+        .trace-mini { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 11px; }
+        .chip { padding: 4px 9px; border-radius: 7px; font-family: "Cascadia Code", Consolas, monospace; font-size: 0.72rem; font-weight: 700; }
+        .chip.ok { border: 1px solid #cfe5da; color: var(--green-dark); background: #e9f9f0; }
+        .chip.bad { border: 1px solid #f3cdbf; color: #ae4c35; background: #ffe6e0; }
+        .chip-arrow { color: #8aa9a0; font-size: 0.74rem; }
+        .hero-call {
+            margin-top: 11px;
+            padding: 11px 13px;
+            border-radius: 9px;
+            color: #e8f2ee;
+            background: var(--ink);
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.73rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        .hero-verdict { display: inline-flex; align-self: flex-start; margin-top: 10px; padding: 5px 10px; border-radius: 999px; color: var(--green-dark); background: rgba(217,244,231,0.95); font-size: 0.72rem; font-weight: 850; }
+
+        .section { padding: 62px 0; }
+        .section-white { border-top: 1px solid rgba(24,54,56,0.06); border-bottom: 1px solid rgba(24,54,56,0.06); background: rgba(255,255,255,0.7); }
+        .section-heading { max-width: 980px; margin-bottom: 24px; }
+        .section-kicker { margin: 0 0 7px; color: var(--green); font-size: 0.74rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; }
+        h2 { margin: 0; font-size: 2.15rem; line-height: 1.24; }
+        h3 { font-size: 1.12rem; line-height: 1.4; }
+        .section-heading p { margin: 10px 0 0; color: var(--muted); }
+        .goal { display: inline-block; margin-top: 12px; padding: 8px 13px; border: 1px dashed #c9ded3; border-radius: 10px; color: var(--green-dark); background: #fbfdfc; font-size: 0.85rem; }
+        code, .mono { font-family: "Cascadia Code", Consolas, "Courier New", monospace; }
+        .prose p { margin: 0 0 12px; }
+        .prose { color: var(--muted); font-size: 0.94rem; }
+        .prose strong { color: var(--ink); }
+
+        .block { margin-top: 22px; }
+        .block:first-child { margin-top: 0; }
+        .block-title { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; font-size: 1.06rem; }
+        .block-title .idx { color: var(--green); font-family: "Cascadia Code", Consolas, monospace; font-size: 0.82rem; font-weight: 900; }
+        .sub-title { margin: 22px 0 9px; font-size: 0.98rem; }
+
+        .flow-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 14px; }
+        .flow-step { padding: 14px 12px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+        .flow-step span { display: block; color: var(--green); font-size: 0.68rem; font-weight: 900; }
+        .flow-step code { display: block; margin-top: 5px; color: var(--ink); font-size: 0.8rem; font-weight: 700; }
+        .flow-step small { display: block; margin-top: 3px; color: var(--muted); font-size: 0.74rem; }
+        .flow-step.bad { border-color: #f3cdbf; background: #fff8f5; }
+        .flow-step.bad code { color: #ae4c35; }
+
+        .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: white; }
+        table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eaf1ed; vertical-align: top; }
+        th { color: var(--green-dark); background: #f7faf8; font-size: 0.73rem; font-weight: 850; }
+        tbody tr:last-child td { border-bottom: 0; }
+        td code { font-size: 0.8rem; }
+        .mark-safe { color: var(--green-dark); font-weight: 800; }
+        .mark-bad { color: #ae4c35; font-weight: 800; }
+
+        .split-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-top: 14px; }
+        .panel { padding: 16px 17px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+        .panel h4 { margin: 0 0 8px; font-size: 0.9rem; }
+        .panel.warn { border-color: #f3cdbf; background: #fff8f5; }
+        .panel.warn h4 { color: #ae4c35; }
+        .panel ol, .panel ul { margin: 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.85rem; }
+        .panel li + li { margin-top: 4px; }
+
+        .quote { margin: 14px 0 0; padding: 14px 16px; border-left: 3px solid var(--green); border-radius: 0 10px 10px 0; color: var(--ink); background: #f5fbf8; font-size: 0.9rem; font-weight: 700; }
+        .note { margin-top: 14px; padding: 13px 15px; border: 1px dashed #c9ded3; border-radius: 11px; color: var(--muted); background: #fbfdfc; font-size: 0.86rem; }
+        .note strong { color: var(--green-dark); }
+
+        .formula { margin: 12px 0; padding: 12px 15px; border: 1px solid #cfe5da; border-radius: 10px; color: var(--green-dark); background: #f0faf5; font-size: 0.9rem; font-weight: 750; text-align: center; }
+
+        .quiz-stack { display: grid; gap: 14px; margin-top: 14px; }
+        .quiz-card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 10px 30px rgba(25,59,52,0.05); }
+        .quiz-num { margin: 0 0 4px; color: var(--green); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+        .quiz-q { margin: 0; font-size: 0.98rem; }
+        .quiz-hint { margin: 6px 0 0; color: var(--muted); font-size: 0.82rem; }
+        .option-list { display: grid; gap: 8px; margin-top: 13px; }
+        .option {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            width: 100%;
+            padding: 11px 13px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--ink);
+            background: #fbfdfc;
+            font: inherit;
+            font-size: 0.86rem;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.16s ease, background 0.16s ease;
+        }
+        .option:hover { border-color: #b9d8c9; background: #f4fbf7; }
+        .option .key { flex: none; display: grid; width: 22px; height: 22px; place-items: center; border-radius: 6px; color: var(--green-dark); background: #eef3f0; font-size: 0.74rem; font-weight: 900; }
+        .option[aria-pressed="true"] { border-color: var(--green); background: #eefaf4; }
+        .option.is-correct { border-color: #7cc4a6; background: #e9f9f0; }
+        .option.is-correct .key { color: var(--green-dark); background: var(--mint); }
+        .option.is-wrong { border-color: #ecb3a0; background: #fff3ee; }
+        .option.is-wrong .key { color: #ae4c35; background: #ffe0d6; }
+        .quiz-feedback { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 0.85rem; }
+        .quiz-feedback.show { display: block; }
+        .quiz-feedback.ok { border: 1px solid #bfe3d1; background: #effaf4; }
+        .quiz-feedback.no { border: 1px solid #f3cdbf; background: #fff5f0; }
+        .quiz-feedback strong { display: block; margin-bottom: 3px; }
+        .quiz-feedback.ok strong { color: var(--green-dark); }
+        .quiz-feedback.no strong { color: #a14428; }
+        .quiz-feedback .ans { display: block; margin-top: 6px; color: var(--muted); font-size: 0.79rem; }
+
+        .code-card { overflow: hidden; border: 1px solid #14383b; border-radius: 13px; background: #0f2c2f; }
+        .code-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 13px; background: #153a3d; }
+        .code-name { color: #a9d3c4; font-family: "Cascadia Code", Consolas, monospace; font-size: 0.74rem; }
+        .code-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+        .code-btn {
+            padding: 5px 10px;
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 7px;
+            color: #dcece5;
+            background: rgba(255,255,255,0.08);
+            font: inherit;
+            font-size: 0.74rem;
+            font-weight: 750;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .code-btn:hover { background: rgba(255,255,255,0.18); }
+        pre.code {
+            margin: 0;
+            padding: 14px 16px;
+            overflow-x: auto;
+            color: #e8f2ee;
+            font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+            font-size: 0.78rem;
+            line-height: 1.66;
+            tab-size: 4;
+        }
+        details.answer { margin-top: 11px; border: 1px solid #1f4a4c; border-radius: 13px; background: #0f2c2f; overflow: hidden; }
+        details.answer > summary { padding: 12px 15px; color: #b8e0d0; background: #153a3d; font-size: 0.84rem; font-weight: 850; cursor: pointer; }
+        details.answer > summary::marker { color: #6fb39c; }
+        .answer-body { padding: 12px 13px 14px; }
+        .answer-body > * + * { margin-top: 12px; }
+        .out-head { padding: 8px 13px; color: #a9d3c4; background: #153a3d; font-family: "Cascadia Code", Consolas, monospace; font-size: 0.72rem; }
+        pre.out-block {
+            margin: 0;
+            padding: 12px 16px;
+            overflow-x: auto;
+            color: #d7e8e2;
+            background: #0b2427;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.76rem;
+            line-height: 1.7;
+        }
+        .answer-note { margin: 0; padding: 0 3px; color: #b6cfc7; font-size: 0.83rem; }
+        .practice-head { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; justify-content: space-between; }
+        .practice-meta { color: var(--muted); font-size: 0.8rem; }
+
+        .task-card { padding: 23px; border: 1px solid #cfe5da; border-radius: 19px; background: linear-gradient(145deg, #ffffff 0%, #f2fbf6 100%); box-shadow: var(--shadow); }
+        .task-top { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .task-badge { padding: 5px 10px; border-radius: 999px; color: var(--green-dark); background: var(--mint); font-size: 0.73rem; font-weight: 850; }
+        .task-badge.orange { color: #a75424; background: #fff0df; }
+        .task-grid { display: grid; gap: 1px; overflow: hidden; border: 1px solid #e1eee7; border-radius: 12px; background: #e1eee7; }
+        .task-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); background: white; }
+        .task-label { padding: 13px 15px; color: var(--green-dark); background: #f3faf6; font-size: 0.82rem; font-weight: 850; }
+        .task-value { padding: 13px 15px; font-size: 0.87rem; }
+        .contact-value { color: var(--green-dark); font-weight: 800; }
+        .resource-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .resource-btn { display: inline-flex; min-height: 38px; align-items: center; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--green-dark); background: white; font-size: 0.81rem; font-weight: 750; text-decoration: none; }
+        .resource-btn:hover { border-color: #b9d8c9; background: #f7fbf9; }
+
+        .check-panel { margin-top: 16px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+        .check-panel h3 { margin: 0 0 3px; font-size: 0.98rem; }
+        .accept-list { margin: 9px 0 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.85rem; }
+        .accept-list li + li { margin-top: 5px; }
+        .checklist { display: grid; gap: 7px; margin-top: 12px; }
+        .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; cursor: pointer; }
+        .check-item input { margin-top: 0.35rem; accent-color: var(--green); }
+        .check-progress { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+        .progress-track { flex: 1; height: 8px; overflow: hidden; border-radius: 999px; background: #edf3ef; }
+        .progress-fill { width: 0; height: 100%; border-radius: 999px; background: var(--green); transition: width 0.25s ease; }
+        .check-count { color: var(--muted); font-size: 0.77rem; font-variant-numeric: tabular-nums; }
+        .safety-note { margin-top: 16px; padding: 14px 16px; border: 1px solid #f3d3c7; border-radius: 12px; color: #7b4a38; background: #fff8f5; font-size: 0.84rem; }
+        .safety-note strong { color: #a14428; }
+
+        .scope-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+        .scope-card { padding: 16px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+        .scope-card .num { display: grid; width: 30px; height: 30px; place-items: center; margin-bottom: 9px; border-radius: 9px; color: var(--green-dark); background: var(--mint); font-size: 0.7rem; font-weight: 900; }
+        .scope-card:nth-child(2) .num { color: #a75424; background: #fff0df; }
+        .scope-card:nth-child(3) .num { color: #5652a0; background: var(--lavender); }
+        .scope-card h4 { margin: 0 0 5px; font-size: 0.92rem; }
+        .scope-card p { margin: 0; color: var(--muted); font-size: 0.82rem; }
+
+        .contact-card { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 18px; margin-top: 16px; }
+        .contact-main { padding: 22px; border: 1px solid #cfe5da; border-radius: 16px; background: linear-gradient(145deg, #ffffff 0%, #f2fbf6 100%); }
+        .contact-main h3 { margin: 0 0 8px; font-size: 1.06rem; }
+        .contact-main p { margin: 0 0 10px; color: var(--muted); font-size: 0.88rem; }
+        .contact-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; padding: 10px 12px; border: 1px solid #e1eee7; border-radius: 10px; background: white; font-size: 0.88rem; }
+        .contact-line + .contact-line { margin-top: 8px; }
+        .contact-line span:first-child { color: var(--muted); font-size: 0.78rem; font-weight: 800; }
+        .contact-line strong { color: var(--green-dark); font-size: 1rem; }
+        .boundary-card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: white; }
+        .boundary-card h3 { margin: 0 0 8px; font-size: 0.98rem; }
+        .boundary-card ul { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.84rem; }
+        .boundary-card li + li { margin-top: 6px; }
+
+        footer { padding: 26px 0 36px; color: var(--muted); font-size: 0.83rem; }
+        .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; padding-top: 20px; border-top: 1px solid var(--line); }
+
+        @media (max-width: 920px) {
+            .hero { grid-template-columns: 1fr; gap: 30px; padding: 46px 0 30px; }
+            h1 { font-size: 2.7rem; }
+            h2 { font-size: 1.9rem; }
+            .flow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .split-grid, .scope-grid, .contact-card { grid-template-columns: 1fr; }
+            .nav a:not(.home-link) { display: none; }
+        }
+
+        @media (max-width: 680px) {
+            .shell { width: min(100% - 28px, 560px); }
+            .topbar { min-height: 70px; }
+            h1 { font-size: 2.15rem; }
+            h2 { font-size: 1.62rem; }
+            .section { padding: 46px 0; }
+            .flow-grid { grid-template-columns: 1fr; }
+            .task-row { grid-template-columns: 1fr; }
+            .task-label { padding-bottom: 4px; }
+            .task-value { padding-top: 4px; }
+            .option { font-size: 0.84rem; }
+            pre.code, pre.out-block { font-size: 0.74rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="shell topbar">
+        <a class="brand" href="#top" aria-label="Agent 轨迹投毒侦探首页">
+            <span class="brand-mark">轨迹</span>
+            <span><span class="brand-name">TraceLab</span><span class="brand-sub">训练轨迹数据审查</span></span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+            <a href="#about">实验概况</a>
+            <a href="#module1">基础一</a>
+            <a href="#module2">基础二</a>
+            <a href="#challenge">综合实验</a>
+            <a href="#contact">联系</a>
+            <a class="home-link" href="../../agentlab/">返回 AgentLab ↗</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="shell hero" aria-labelledby="hero-title">
+            <div>
+                <span class="kicker"><span class="kicker-dot"></span>Agent 安全 · 本科生入门实验</span>
+                <h1 id="hero-title">AI 学习的操作示范，<span class="accent">真的安全吗？</span></h1>
+                <p class="hero-copy">
+                    Agent 会围绕任务调用工具，记录下来的过程就是一条“示范轨迹”。若示范里混入了删除原文件、外发文件这类与任务约束冲突的操作，它就可能变成不合适的训练材料。这个实验给你 8 条人工构造的模拟轨迹，用一段 Python 把它们逐条检查一遍。
+                </p>
+                <p class="hero-sub">副标题：Agent 训练示范轨迹中的可疑操作检查与来源对照</p>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#module1">从头开始学 <span aria-hidden="true">→</span></a>
+                    <a class="button button-secondary" href="#challenge">直接看综合实验</a>
+                    <a class="button button-secondary" href="agent_trace_starter.zip" download>下载 starter 包</a>
+                </div>
+                <div class="hero-notes">
+                    <span>8 条人工构造轨迹</span>
+                    <span>只用 Python 标准库</span>
+                    <span>不训练真实模型</span>
+                    <span>约 2–3 小时</span>
+                </div>
+            </div>
+
+            <aside class="console" aria-label="一条模拟轨迹的检查示例">
+                <div class="console-head">
+                    <span class="console-title">轨迹检查台 · T03</span>
+                    <span class="sim-badge">SIMULATED ONLY</span>
+                </div>
+                <div class="hero-task">任务：读取 report.txt，生成摘要并保存到 summary.txt，同时保留原文件。</div>
+                <div class="trace-mini">
+                    <span class="chip ok">read_file</span>
+                    <span class="chip-arrow">→</span>
+                    <span class="chip bad">delete_file</span>
+                    <span class="chip-arrow">→</span>
+                    <span class="chip ok">save_summary</span>
+                </div>
+                <div class="hero-call">allowed_tools = ["read_file", "save_summary"]
+delete_file 不在允许工具列表中 → 可疑步骤</div>
+                <span class="hero-verdict">该轨迹记为 1 条可疑轨迹</span>
+            </aside>
+        </section>
+
+        <div class="shell toc-strip">
+            <nav class="toc" aria-label="页面目录">
+                <span class="toc-label">目录</span>
+                <a href="#module1">基础模块一 · 认识 Agent 轨迹</a>
+                <a href="#module2">基础模块二 · 可疑示范</a>
+                <a href="#challenge">综合实验 · 训练轨迹审查</a>
+                <a href="#contact">结论与联系方式</a>
+            </nav>
+        </div>
+
+        <section class="section section-white" id="about" aria-labelledby="about-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">About · 实验概况</p>
+                    <h2 id="about-title">先看清一套数据，再决定要不要往下做</h2>
+                    <p>整个实验在同一个页面里完成：先认识轨迹长什么样，再认识什么叫可疑示范，最后自己补全一段检查程序。</p>
+                </div>
+
+                <div class="table-wrap">
+                    <table aria-label="实验概况">
+                        <tbody>
+                            <tr><th scope="row" style="width:170px;">实验类型</th><td>Agent 安全方向 · 本科生入门实验</td></tr>
+                            <tr><th scope="row">实验主题</th><td>Agent 训练示范轨迹中的可疑操作检查与来源对照</td></tr>
+                            <tr><th scope="row">预计用时</th><td>约 2–3 小时，可分段完成</td></tr>
+                            <tr><th scope="row">基础要求</th><td>Python 变量、条件判断、循环、列表和字典的基本使用</td></tr>
+                            <tr><th scope="row">实验形式</th><td>网页知识学习、互动选择题、本地 Python 代码补全及结果核对</td></tr>
+                            <tr><th scope="row">运行环境</th><td>浏览器、Python 3.10 或更高版本；无须 GPU、付费模型接口或真实大模型</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="block" style="margin-top:26px;">
+                    <h3 class="block-title">实验背景：同一句任务，两种示范</h3>
+                    <div class="prose">
+                        <p>Agent 是能够围绕任务调用工具、执行一系列操作的智能体。例如，文件整理 Agent 可以读取文档、生成摘要并保存结果。为使模型学习类似的工具使用方式，研究中可能使用记录了任务、工具调用和操作结果的 <strong>Agent 示范轨迹</strong> 作为训练数据。</p>
+                        <p>假设文件整理任务是：<strong>读取 <code>report.txt</code>，生成摘要并保存为 <code>summary.txt</code>，同时保留原文件。</strong></p>
+                    </div>
+                    <div class="split-grid">
+                        <div class="panel">
+                            <h4>符合任务要求的示范</h4>
+                            <div class="flow-grid" style="grid-template-columns:1fr;margin-top:10px;">
+                                <div class="flow-step"><span>STEP 1</span><code>read_file</code><small>读取 report.txt</small></div>
+                                <div class="flow-step"><span>STEP 2</span><code>save_summary</code><small>保存摘要到 summary.txt</small></div>
+                            </div>
+                        </div>
+                        <div class="panel warn">
+                            <h4>包含可疑操作的示范</h4>
+                            <div class="flow-grid" style="grid-template-columns:1fr;margin-top:10px;">
+                                <div class="flow-step"><span>STEP 1</span><code>read_file</code><small>读取 report.txt</small></div>
+                                <div class="flow-step bad"><span>STEP 2</span><code>delete_file</code><small>与“保留原文件”冲突</small></div>
+                                <div class="flow-step"><span>STEP 3</span><code>save_summary</code><small>保存摘要到 summary.txt</small></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="note"><strong>本实验聚焦训练前的轨迹数据质量检查</strong>，不是对正在执行任务的 Agent 进行实时拦截或纠错。轨迹只是记录，即使记录里写着 <code>result: "success"</code>，也不代表现实文件系统发生了变化。</p>
+                </div>
+
+                <div class="block" style="margin-top:26px;">
+                    <h3 class="block-title">实验内容：四件小事</h3>
+                    <div class="flow-grid">
+                        <div class="flow-step"><span>01</span><code>认识轨迹</code><small>任务、工具、步骤、参数的组成</small></div>
+                        <div class="flow-step"><span>02</span><code>对照示范</code><small>正常示范与违反约束的示范</small></div>
+                        <div class="flow-step"><span>03</span><code>补全代码</code><small>按规则检查 8 条模拟轨迹</small></div>
+                        <div class="flow-step"><span>04</span><code>来源对照</code><small>统计来源 A、B 的可疑比例</small></div>
+                    </div>
+                    <p class="note">实验使用规则检查作为入门方法，不涉及真实模型训练、后门植入或水印算法实现。全部文件名、任务、工具调用与来源标签都是教学用的模拟内容。</p>
+                </div>
+
+                <div class="task-card" style="margin-top:26px;">
+                    <div class="task-top">
+                        <span class="task-badge">约 2–3 小时</span>
+                        <span class="task-badge">需要基础 Python</span>
+                        <span class="task-badge orange">只用标准库</span>
+                        <span class="task-badge">全程模拟数据</span>
+                    </div>
+                    <div class="task-grid">
+                        <div class="task-row">
+                            <div class="task-label">做什么</div>
+                            <div class="task-value">阅读两个基础模块（含 4 道选择题、2 道代码补全练习），然后补全 <code>challenge_starter.py</code> 中的 5 个 <code>TODO</code>，用一条工具白名单规则检查 8 条模拟轨迹，找出可疑示范并统计来源 A、B 的可疑比例。</div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">需要什么基础</div>
+                            <div class="task-value">掌握少量 Python 语法：变量、<code>if</code> 条件判断、<code>for</code> 循环、列表与字典，能在本地运行 <code>.py</code> 文件。Agent、工具调用、JSON 读取等内容本页会讲，不需要 GPU 或真实模型接口。</div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">第一次交付什么</div>
+                            <div class="task-value">一份补全后可运行的 Python 轨迹审查程序，以及它生成的检查结果：可疑轨迹编号、触发规则，以及来源 A、B 的轨迹数、可疑轨迹数与可疑比例。网页提供参考输出，方便你自我核对。</div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">谁来接应</div>
+                            <div class="task-value">付于文（Agent 轨迹安全方向研究生）</div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">怎么联系</div>
+                            <div class="task-value contact-value">QQ 3344501916 · 添加好友时备注来意即可</div>
+                        </div>
+                    </div>
+                    <div class="resource-row">
+                        <a class="resource-btn" href="agent_trace_starter.zip" download>下载 starter 压缩包</a>
+                        <a class="resource-btn" href="data/trajectories.json" download>下载实验数据 trajectories.json</a>
+                        <a class="resource-btn" href="outputs/expected_output.txt" download>下载参考输出</a>
+                        <a class="resource-btn" href="code/challenge_starter.py" download>下载综合实验框架</a>
+                    </div>
+                    <div class="safety-note">
+                        <strong>实验边界：</strong>所有轨迹、文件与来源标签都是模拟数据，程序不会对真实文件执行删除或发送操作。这里被标记的是<strong>可疑示范</strong>，不等于已确认的恶意投毒，更不等于已验证的训练后危害。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="module1" aria-labelledby="module1-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Module 1 · 基础模块一</p>
+                    <h2 id="module1-title">认识 Agent 与训练示范轨迹</h2>
+                    <span class="goal">学习目标：理解 Agent、工具调用与轨迹的关系；认识训练示范的基本结构；能从 Python 字典和列表中读取工具调用信息。</span>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">1.1</span>从文件整理任务认识 Agent</h3>
+                    <div class="prose">
+                        <p>设定一个文件整理任务：读取 <code>report.txt</code> 中的内容，将摘要保存为 <code>summary.txt</code>，并保留原始文件。</p>
+                        <p>普通语言模型可以根据输入生成一段文本；<strong>具备工具调用能力的 Agent</strong> 则可以根据任务选择工具、传递参数，利用工具返回的信息继续后续操作。</p>
+                    </div>
+                    <div class="flow-grid">
+                        <div class="flow-step"><span>01</span><code>read_file</code><small>读取 report.txt</small></div>
+                        <div class="flow-step"><span>02</span><code>生成摘要</code><small>根据读到的内容处理</small></div>
+                        <div class="flow-step"><span>03</span><code>save_summary</code><small>保存为 summary.txt</small></div>
+                        <div class="flow-step"><span>04</span><code>任务完成</code><small>给出完成情况</small></div>
+                    </div>
+                    <p class="note"><code>read_file</code>、<code>save_summary</code> 是本实验中约定的<strong>虚拟工具名称</strong>，不对应真实文件操作。Agent 的能力不仅取决于能否生成文字，还取决于是否能在任务约束下正确选择和使用工具。</p>
+                    <div class="table-wrap" style="margin-top:14px;">
+                        <table aria-label="概念区分">
+                            <thead><tr><th scope="col">名称</th><th scope="col">通俗理解</th><th scope="col">在本实验中的例子</th></tr></thead>
+                            <tbody>
+                                <tr><td>用户任务（Task）</td><td>需要完成的目标</td><td>读取报告并保存摘要</td></tr>
+                                <tr><td>工具（Tool）</td><td>用来执行某类操作的功能</td><td><code>read_file</code>、<code>save_summary</code></td></tr>
+                                <tr><td>工具调用（Tool Call）</td><td>对某个工具发出的操作请求</td><td><code>read_file(filename="report.txt")</code></td></tr>
+                                <tr><td>工具参数（Arguments）</td><td>告诉工具具体操作什么</td><td><code>filename="report.txt"</code></td></tr>
+                                <tr><td>工具结果（Result）</td><td>记录工具返回的信息</td><td><code>success</code> 或 <code>blocked</code></td></tr>
+                                <tr><td>轨迹（Trajectory）</td><td>一次任务中按顺序记录的操作过程</td><td>读取 → 保存摘要</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">1.2</span>什么是 Agent 轨迹？</h3>
+                    <div class="prose">
+                        <p><strong>Agent 轨迹</strong>可以理解为一次任务的“操作流水账”：记录任务是什么、过程中调用过哪些工具、各次调用使用了什么参数、得到了什么结果。研究数据中还可能包含模型的中间输出、环境观察或最终回答；本实验为降低难度，只保留最基础的字段。</p>
+                        <p>下面是一条简化的正常示范（教学示例，不是最终实验的 8 条数据之一）。</p>
+                    </div>
+                    <div class="code-card">
+                        <div class="code-head">
+                            <span class="code-name">简化示范 · DEMO01</span>
+                            <div class="code-actions">
+                                <button class="code-btn" type="button" data-copy="#demo-json">复制代码</button>
+                            </div>
+                        </div>
+                        <pre class="code" id="demo-json">{
+  "trace_id": "DEMO01",
+  "source": "A",
+  "task": "读取 report.txt 并保存摘要，保留原文件",
+  "allowed_tools": ["read_file", "save_summary"],
+  "steps": [
+    {
+      "tool": "read_file",
+      "args": {"filename": "report.txt"},
+      "result": "success"
+    },
+    {
+      "tool": "save_summary",
+      "args": {"filename": "summary.txt"},
+      "result": "success"
+    }
+  ]
+}</pre>
+                    </div>
+                    <div class="panel" style="margin-top:12px;">
+                        <h4>字段含义</h4>
+                        <ul>
+                            <li><code>trace_id</code>：轨迹编号，用于定位某条记录；</li>
+                            <li><code>source</code>：示范数据的来源标签，本例为 <code>A</code>；</li>
+                            <li><code>task</code>：任务文字说明；</li>
+                            <li><code>allowed_tools</code>：本条任务允许使用的工具列表；</li>
+                            <li><code>steps</code>：按顺序排列的工具调用步骤；</li>
+                            <li><code>tool</code>、<code>args</code>、<code>result</code>：分别表示步骤中的工具名称、调用参数及记录的返回结果。</li>
+                        </ul>
+                    </div>
+                    <p class="note"><strong>注意：</strong>轨迹是一份记录，不等同于正在实时执行的 Agent。即使记录里出现 <code>result: "success"</code>，在本教学数据中也只是预先给定的示范字段，不能据此推断现实设备或文件系统发生了变化。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">1.3</span>为什么轨迹可以成为训练示范？</h3>
+                    <div class="prose">
+                        <p>学习写作文时，范文展示了如何组织内容；学习工具调用时，一条完整轨迹也可以展示“在某种任务下，先选择什么工具、再做什么操作”的模式。</p>
+                        <p>在某些训练方法中，模型可以利用这类示范学习工具调用行为。因此，<strong>示范质量很重要</strong>：符合任务要求的轨迹可以提供有用的行为样例；不符合要求的轨迹则可能带来不适当的示范。</p>
+                        <p>这并不意味着模型必然逐字模仿示范，也不意味着出现一条不安全示范就一定会训练出不安全模型。训练后的实际影响需要另外通过模型实验验证。</p>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">1.4</span>读懂 JSON 与 Python 列表、字典</h3>
+                    <div class="prose"><p>本实验用 JSON 保存轨迹。常见符号如下。</p></div>
+                    <div class="table-wrap">
+                        <table aria-label="JSON 与 Python 概念对照">
+                            <thead><tr><th scope="col">写法</th><th scope="col">含义</th><th scope="col">对应 Python 概念</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>{ "tool": "read_file" }</code></td><td>一条带字段的数据记录</td><td>字典 <code>dict</code></td></tr>
+                                <tr><td><code>["read_file", "save_summary"]</code></td><td>按顺序排列的多个值</td><td>列表 <code>list</code></td></tr>
+                                <tr><td><code>"steps"</code></td><td>字段名</td><td>字典的键（key）</td></tr>
+                                <tr><td><code>"read_file"</code></td><td>文本数据</td><td>字符串 <code>str</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="code-card" style="margin-top:12px;">
+                        <div class="code-head">
+                            <span class="code-name">Python · 读字典与遍历列表</span>
+                            <div class="code-actions">
+                                <button class="code-btn" type="button" data-copy="#demo-py">复制代码</button>
+                            </div>
+                        </div>
+                        <pre class="code" id="demo-py">record = {"name": "示例工具", "status": "success"}
+print(record["name"])           # 示例工具
+
+items = ["第一步", "第二步"]
+for item in items:
+    print(item)</pre>
+                    </div>
+                    <p class="note">处理轨迹时，核心思路就是：先取得 <code>steps</code> 列表，再逐个读取步骤内的 <code>tool</code> 字段。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">1.5</span>互动选择题</h3>
+                    <p class="practice-meta">点击选项后立即显示对错和解析；可以随时换一个选项再试，不记分、不排名。</p>
+                    <div class="quiz-stack">
+                        <div class="quiz-card">
+                            <p class="quiz-num">选择题 1-1 · 什么是轨迹</p>
+                            <h3 class="quiz-q">在本实验中，哪项描述最符合 <strong>Agent 工具调用轨迹</strong> 的含义？</h3>
+                            <div class="option-list">
+                                <button class="option" type="button" data-correct="false" data-feedback="最终回答可能是轨迹的一部分，但无法代表完整调用过程。"><span class="key">A</span><span>只包含 Agent 最终回答的一句话。</span></button>
+                                <button class="option" type="button" data-correct="true" data-feedback="轨迹关注任务过程，通常包含多步工具操作及其相关信息。"><span class="key">B</span><span>包含任务和一系列工具调用记录的数据。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="显卡是计算硬件，不是操作记录。"><span class="key">C</span><span>用来训练模型的显卡硬件。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="CSS 用于网页样式，与 Agent 轨迹无关。"><span class="key">D</span><span>用来显示网页的 CSS 样式文件。</span></button>
+                            </div>
+                            <div class="quiz-feedback" aria-live="polite"></div>
+                        </div>
+
+                        <div class="quiz-card">
+                            <p class="quiz-num">选择题 1-2 · 轨迹中的 steps</p>
+                            <h3 class="quiz-q">对于本实验的 JSON 结构，<code>steps</code> 字段最主要存放什么？</h3>
+                            <div class="option-list">
+                                <button class="option" type="button" data-correct="false" data-feedback="访问人数不是轨迹步骤。"><span class="key">A</span><span>当前网页的访问人数。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="source 才是本实验中的来源标签，而且不表示联系方式。"><span class="key">B</span><span>数据来源的联系方式。</span></button>
+                                <button class="option" type="button" data-correct="true" data-feedback="steps 是列表，其中每个元素是一条工具调用记录。"><span class="key">C</span><span>按顺序排列的工具调用步骤。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="Python 安装路径不是轨迹数据字段。"><span class="key">D</span><span>Python 安装路径。</span></button>
+                            </div>
+                            <div class="quiz-feedback" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">1.6</span>代码补全练习 1 · 读取工具名称</h3>
+                    <div class="practice-head">
+                        <div class="prose" style="max-width:720px;">
+                            <p>已给出轨迹字典和遍历步骤的循环。补全循环中的一个 <code>TODO</code>，读取当前步骤的工具名称并打印，其余代码保持不变。</p>
+                        </div>
+                        <span class="practice-meta">涉及知识：字典取值、列表遍历</span>
+                    </div>
+                    <div class="code-card" style="margin-top:12px;">
+                        <div class="code-head">
+                            <span class="code-name">code/practice1_starter.py</span>
+                            <div class="code-actions">
+                                <button class="code-btn" type="button" data-copy="#p1-starter">复制代码</button>
+                                <a class="code-btn" href="code/practice1_starter.py" download>下载</a>
+                            </div>
+                        </div>
+                        <pre class="code" id="p1-starter"># 练习 1：读取 Agent 轨迹中的工具名称
+
+trace = {
+    "trace_id": "DEMO01",
+    "source": "A",
+    "task": "读取 report.txt 并保存摘要，保留原文件",
+    "allowed_tools": ["read_file", "save_summary"],
+    "steps": [
+        {
+            "tool": "read_file",
+            "args": {"filename": "report.txt"},
+            "result": "success",
+        },
+        {
+            "tool": "save_summary",
+            "args": {"filename": "summary.txt"},
+            "result": "success",
+        },
+    ],
+}
+
+print(f"轨迹编号：{trace['trace_id']}")
+
+for step in trace["steps"]:
+    tool_name = None  # TODO：从当前 step 字典中读取工具名称，替换 None
+    print(f"调用工具：{tool_name}")</pre>
+                    </div>
+                    <details class="answer">
+                        <summary>查看参考答案 · code/practice1_answer.py</summary>
+                        <div class="answer-body">
+                            <div class="code-card">
+                                <div class="code-head">
+                                    <span class="code-name">code/practice1_answer.py</span>
+                                    <div class="code-actions">
+                                        <button class="code-btn" type="button" data-copy="#p1-answer">复制代码</button>
+                                    </div>
+                                </div>
+                                <pre class="code" id="p1-answer"># 练习 1：读取 Agent 轨迹中的工具名称（参考答案）
+
+trace = {
+    "trace_id": "DEMO01",
+    "source": "A",
+    "task": "读取 report.txt 并保存摘要，保留原文件",
+    "allowed_tools": ["read_file", "save_summary"],
+    "steps": [
+        {
+            "tool": "read_file",
+            "args": {"filename": "report.txt"},
+            "result": "success",
+        },
+        {
+            "tool": "save_summary",
+            "args": {"filename": "summary.txt"},
+            "result": "success",
+        },
+    ],
+}
+
+print(f"轨迹编号：{trace['trace_id']}")
+
+for step in trace["steps"]:
+    tool_name = step["tool"]
+    print(f"调用工具：{tool_name}")</pre>
+                            </div>
+                            <div class="code-card">
+                                <div class="code-head"><span class="code-name">运行结果</span></div>
+                                <pre class="out-block">轨迹编号：DEMO01
+调用工具：read_file
+调用工具：save_summary</pre>
+                            </div>
+                            <p class="answer-note">解释：循环每次取得一个步骤，再读取该步骤的 <code>tool</code> 字段，因而能够按顺序输出两个工具名称。</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="module2" aria-labelledby="module2-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Module 2 · 基础模块二</p>
+                    <h2 id="module2-title">认识训练轨迹中的可疑示范</h2>
+                    <span class="goal">学习目标：理解训练轨迹数据投毒的基本含义；识别违反明确任务约束的示范步骤；理解简单规则检查的能力与局限；认识来源标签的统计用途。</span>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.1</span>为什么要检查训练示范？</h3>
+                    <div class="prose"><p>设定同一文件整理任务：读取 <code>report.txt</code>，将摘要保存为 <code>summary.txt</code>，<strong>保留原文件</strong>。</p></div>
+                    <div class="table-wrap">
+                        <table aria-label="正常示范与可疑示范对照">
+                            <thead><tr><th scope="col">正常示范</th><th scope="col">包含可疑操作的示范</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>read_file(report.txt)</code></td><td><code>read_file(report.txt)</code></td></tr>
+                                <tr><td><code>save_summary(summary.txt)</code></td><td><code>save_summary(summary.txt)</code></td></tr>
+                                <tr><td>任务结束</td><td><code>delete_file(report.txt)</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="prose" style="margin-top:12px;">
+                        <p>右侧示范多出了一次 <code>delete_file</code> 操作，与“保留原文件”的任务约束冲突。为了让检查条件明确，本实验用 <code>allowed_tools</code> 列出每条任务允许出现的工具：</p>
+                    </div>
+                    <div class="code-card">
+                        <div class="code-head"><span class="code-name">工具白名单</span><div class="code-actions"><button class="code-btn" type="button" data-copy="#allow-tools">复制代码</button></div></div>
+                        <pre class="code" id="allow-tools">"allowed_tools": ["read_file", "save_summary"]</pre>
+                    </div>
+                    <p class="note">对于上述任务，<code>delete_file</code> 不在允许列表中，因此对应步骤应被标记为<strong>可疑</strong>。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.2</span>什么是轨迹数据投毒？</h3>
+                    <div class="prose">
+                        <p><strong>数据投毒（Data Poisoning）</strong>是指攻击者在可影响的数据中有意加入或修改样本，试图影响模型训练后的行为。对于 Agent，投毒目标可能涉及工具选择、操作顺序或任务执行方式。</p>
+                        <p><code>正常示范数据 → 用作训练材料 → 模型学习任务模式</code><br><code>被恶意修改的示范数据 → 用作训练材料 → 可能影响模型学习到的行为模式</code></p>
+                        <p>本实验并不实施真实投毒训练，而是构造“正常轨迹与可疑轨迹混合”的模拟数据集，练习训练前的数据审查。必须区分三个层次：</p>
+                    </div>
+                    <div class="scope-grid">
+                        <div class="scope-card"><span class="num">01</span><h4>规则命中</h4><p>一条轨迹包含不在允许列表中的工具调用，可被检查程序标记。</p></div>
+                        <div class="scope-card"><span class="num">02</span><h4>恶意意图</h4><p>规则命中不能证明这条数据一定由攻击者故意投毒；也可能是记录错误、规则过严或其他原因。</p></div>
+                        <div class="scope-card"><span class="num">03</span><h4>训练后危害</h4><p>即使训练数据真的被投毒，也需要通过训练与行为实验，才能判断模型是否受到影响。</p></div>
+                    </div>
+                    <p class="note">因此，本实验程序的输出使用 <strong>“可疑轨迹”</strong>，不使用“已证实投毒轨迹”作为检测结论。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.3</span>一个可解释的入门检查规则</h3>
+                    <p class="quote">如果某个工具调用的 <code>tool</code> 名称不在该任务的 <code>allowed_tools</code> 列表中，则将该步骤标记为可疑。只要有一个可疑步骤，该轨迹就属于可疑轨迹。</p>
+                    <div class="prose" style="margin-top:12px;">
+                        <p>这个规则具有清晰的输入和输出：输入是允许工具列表、轨迹步骤列表；检查是逐项比较 <code>tool</code> 是否出现在 <code>allowed_tools</code> 中；输出是可疑步骤、所在轨迹编号及对应原因。</p>
+                    </div>
+                    <div class="code-card">
+                        <div class="code-head"><span class="code-name">检查示例</span><div class="code-actions"><button class="code-btn" type="button" data-copy="#rule-demo">复制代码</button></div></div>
+                        <pre class="code" id="rule-demo">允许工具：read_file、save_summary
+示范步骤：read_file → delete_file → save_summary
+检查结果：delete_file 不在允许列表中，标记为可疑步骤</pre>
+                    </div>
+                    <p class="note"><strong>“被标记的步骤数”和“可疑轨迹数”不是同一个量。</strong>一条轨迹里即使出现两个违规步骤，也只算作一条可疑轨迹。综合实验将按轨迹数量统计来源差异。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.4</span>工具调用记录与真实危害的区别</h3>
+                    <div class="prose"><p>轨迹里的 <code>result</code> 字段可能写着 <code>success</code>、<code>blocked</code> 等状态。对于被拦截的删除请求：</p></div>
+                    <div class="code-card">
+                        <div class="code-head"><span class="code-name">被拦截的删除请求</span><div class="code-actions"><button class="code-btn" type="button" data-copy="#blocked-json">复制代码</button></div></div>
+                        <pre class="code" id="blocked-json">{
+  "tool": "delete_file",
+  "args": {"filename": "report.txt"},
+  "result": "blocked"
+}</pre>
+                    </div>
+                    <p class="note">这里可以观察到“有删除请求”，但<strong>不能据此认定原文件实际被删除</strong>。本实验检查的是示范是否包含不符合规则的工具调用，因此即使 <code>result</code> 是 <code>blocked</code>，仍会将不允许的 <code>delete_file</code> 步骤标为可疑；“成功造成危害”是另一个问题。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.5</span>为什么简单规则也会有局限？</h3>
+                    <div class="prose">
+                        <p>工具白名单是容易理解的入门方法，但并不等于完整的投毒检测器。</p>
+                    </div>
+                    <div class="split-grid">
+                        <div class="panel"><h4>可能误报</h4><p style="margin:0;color:var(--muted);font-size:0.85rem;">任务规则设置过于严格，本来合理的操作被错误标记。</p></div>
+                        <div class="panel"><h4>可能漏报</h4><p style="margin:0;color:var(--muted);font-size:0.85rem;">某个工具名称虽然允许，但参数、目标文件或操作顺序存在问题，单看工具名称无法发现。</p></div>
+                    </div>
+                    <p class="note">例如，允许使用 <code>save_summary</code> 不代表可以任意覆盖所有文件。只检查工具名时，错误的保存路径可能漏检。本实验只要求实现给定的工具列表规则，不要求解决全部复杂情形；所有数据和标准答案都按同一条规则设计。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.6</span>来源标签与对照统计</h3>
+                    <div class="prose">
+                        <p>轨迹的 <code>source</code> 字段表示它在模拟数据集中来自哪一组，例如 <code>A</code> 或 <code>B</code>。综合实验将 8 条轨迹分成两个来源，分别计算可疑轨迹比例。</p>
+                    </div>
+                    <p class="formula">可疑轨迹比例 = 该来源的可疑轨迹数 ÷ 该来源的轨迹总数 × 100%</p>
+                    <div class="prose"><p>例如，仅作为计算示意：某来源有 4 条轨迹，其中 1 条被标为可疑，则其可疑轨迹比例为 25%。这不是最终实验数据的统计结果。</p></div>
+                    <p class="note"><strong>来源比例不同 ≠ 证明某来源实施投毒。</strong>来源标签只帮助进行分组比较，不表示已经追踪到攻击者，更不表示发现了训练后行为损害。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.7</span>互动选择题</h3>
+                    <div class="quiz-stack">
+                        <div class="quiz-card">
+                            <p class="quiz-num">选择题 2-1 · 发现不允许的工具</p>
+                            <h3 class="quiz-q">某任务只允许使用 <code>read_file</code> 和 <code>save_summary</code>，示范中出现 <code>delete_file</code>，其记录结果为 <code>blocked</code>。依据本实验的检查规则，最准确的结论是什么？</h3>
+                            <div class="option-list">
+                                <button class="option" type="button" data-correct="false" data-feedback="本实验审查训练示范中的工具调用，违规尝试也属于规则检查对象。"><span class="key">A</span><span>该步骤不需要检查，因为删除没有成功。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="记录为 blocked，不能推断文件已经删除。"><span class="key">B</span><span>已证明原文件被成功删除。</span></button>
+                                <button class="option" type="button" data-correct="true" data-feedback="delete_file 不在允许列表中；blocked 表示记录中的执行被拦截，不代表删除成功。"><span class="key">C</span><span>该步骤应被标记为可疑，但不能认定文件被成功删除。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="没有进行模型训练和训练后行为测试，无法得出该结论。"><span class="key">D</span><span>已证明训练后的模型会自动删除文件。</span></button>
+                            </div>
+                            <div class="quiz-feedback" aria-live="polite"></div>
+                        </div>
+
+                        <div class="quiz-card">
+                            <p class="quiz-num">选择题 2-2 · 来源对照能够说明什么</p>
+                            <h3 class="quiz-q">假设模拟数据中来源 A 的可疑轨迹比例为 25%，来源 B 为 50%。哪个结论符合实验的证据范围？</h3>
+                            <div class="option-list">
+                                <button class="option" type="button" data-correct="true" data-feedback="这是模拟数据中的描述性统计，不能单凭比例推断攻击意图或训练后影响。"><span class="key">A</span><span>来源 B 的可疑轨迹比例在这批数据中更高，但不能直接证明恶意投毒。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="可疑比例并不能识别攻击者身份。"><span class="key">B</span><span>来源 B 一定是攻击者。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="可疑比例较低不等于全部安全。"><span class="key">C</span><span>来源 A 的轨迹一定全部安全。</span></button>
+                                <button class="option" type="button" data-correct="false" data-feedback="本实验不包含真实模型训练与行为评估。"><span class="key">D</span><span>已证明使用来源 B 训练的 Agent 会产生异常行为。</span></button>
+                            </div>
+                            <div class="quiz-feedback" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.8</span>代码补全练习 2 · 统计可疑步骤</h3>
+                    <div class="practice-head">
+                        <div class="prose" style="max-width:720px;">
+                            <p>给定允许工具列表与三步示范轨迹，其中第二步为不允许的 <code>delete_file</code>。补全循环中的条件判断与计数逻辑，使程序统计规则命中的<strong>步骤数量</strong>。这一步的 <code>delete_file</code> 返回状态为 <code>blocked</code>，由于检查对象是“是否出现不允许的工具调用”，该状态不影响规则命中结果。</p>
+                        </div>
+                        <span class="practice-meta">涉及知识：for 循环、if 判断、列表成员检查、整数计数</span>
+                    </div>
+                    <div class="code-card" style="margin-top:12px;">
+                        <div class="code-head">
+                            <span class="code-name">code/practice2_starter.py</span>
+                            <div class="code-actions">
+                                <button class="code-btn" type="button" data-copy="#p2-starter">复制代码</button>
+                                <a class="code-btn" href="code/practice2_starter.py" download>下载</a>
+                            </div>
+                        </div>
+                        <pre class="code" id="p2-starter"># 练习 2：统计训练示范中的可疑工具调用步骤
+
+allowed_tools = ["read_file", "save_summary"]
+
+steps = [
+    {"tool": "read_file", "result": "success"},
+    {"tool": "delete_file", "result": "blocked"},
+    {"tool": "save_summary", "result": "success"},
+]
+
+suspicious_count = 0
+
+for step in steps:
+    tool_name = step["tool"]
+
+    # TODO 1：替换 False，判断 tool_name 是否不在 allowed_tools 中
+    if False:
+        # TODO 2：删除 pass，将 suspicious_count 加 1
+        pass
+
+print(f"被标记的可疑步骤数：{suspicious_count}")</pre>
+                    </div>
+                    <details class="answer">
+                        <summary>查看参考答案 · code/practice2_answer.py</summary>
+                        <div class="answer-body">
+                            <div class="code-card">
+                                <div class="code-head">
+                                    <span class="code-name">code/practice2_answer.py</span>
+                                    <div class="code-actions">
+                                        <button class="code-btn" type="button" data-copy="#p2-answer">复制代码</button>
+                                    </div>
+                                </div>
+                                <pre class="code" id="p2-answer"># 练习 2：统计训练示范中的可疑工具调用步骤（参考答案）
+
+allowed_tools = ["read_file", "save_summary"]
+
+steps = [
+    {"tool": "read_file", "result": "success"},
+    {"tool": "delete_file", "result": "blocked"},
+    {"tool": "save_summary", "result": "success"},
+]
+
+suspicious_count = 0
+
+for step in steps:
+    tool_name = step["tool"]
+
+    if tool_name not in allowed_tools:
+        suspicious_count += 1
+
+print(f"被标记的可疑步骤数：{suspicious_count}")</pre>
+                            </div>
+                            <div class="code-card">
+                                <div class="code-head"><span class="code-name">运行结果</span></div>
+                                <pre class="out-block">被标记的可疑步骤数：1</pre>
+                            </div>
+                            <p class="answer-note">解释：示范中仅 <code>delete_file</code> 不在允许工具列表中，因此有 1 个步骤被标记。被拦截的返回结果并不改变这里的规则判断。</p>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">基础学习小结 · 进入综合实验前的知识清单</h3>
+                    <div class="panel">
+                        <ol>
+                            <li>Agent 轨迹记录任务过程中的工具调用，可能作为模型训练示范。</li>
+                            <li>Python 中可以用列表存储多步操作，用字典表示单步记录；JSON 可存储同类结构。</li>
+                            <li>任务约束可以转化为简单的工具检查规则，用于发现明确的不允许操作。</li>
+                            <li>被规则标记的<strong>可疑示范</strong>不等于已确认的恶意投毒，更不等于已验证的训练后危害。</li>
+                            <li><code>source</code> 标签可以用于分组统计，但来源差异本身不是攻击者归因证据。</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="challenge" aria-labelledby="challenge-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Challenge · 综合实验</p>
+                    <h2 id="challenge-title">训练轨迹审查：8 条示范，2 个连续小任务</h2>
+                    <p>预计 60–90 分钟 · 只需 Python 3.10 以上版本与标准库。全部操作针对本地 JSON 数据，不调用真实 Agent，不执行文件删除或数据发送操作。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">实验文件</h3>
+                    <div class="table-wrap">
+                        <table aria-label="实验文件清单">
+                            <thead><tr><th scope="col">文件</th><th scope="col">用途</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>data/trajectories.json</code></td><td>包含 8 条待检查的模拟轨迹</td></tr>
+                                <tr><td><code>code/challenge_starter.py</code></td><td>综合实验的 Python 代码框架，保留 5 个 <code>TODO</code></td></tr>
+                                <tr><td><code>code/challenge_answer.py</code></td><td>完整参考实现，用于核对代码思路</td></tr>
+                                <tr><td><code>outputs/expected_output.txt</code></td><td>完整参考程序的示例运行输出</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="code-card" style="margin-top:12px;">
+                        <div class="code-head"><span class="code-name">最简本地运行方式 · 从项目根目录执行</span><div class="code-actions"><button class="code-btn" type="button" data-copy="#run-cmd">复制命令</button></div></div>
+                        <pre class="code" id="run-cmd">python code/challenge_starter.py</pre>
+                    </div>
+                    <p class="note">补全代码后，程序按照已有路径读取 <code>data/trajectories.json</code>。如果直接下载单个文件，请保持 <code>code/</code>、<code>data/</code>、<code>outputs/</code> 的相对目录结构；也可以直接下载 starter 压缩包。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">8 条模拟轨迹一览</h3>
+                    <div class="table-wrap">
+                        <table aria-label="8 条模拟轨迹">
+                            <thead><tr><th scope="col">编号</th><th scope="col">来源</th><th scope="col">工具调用顺序</th><th scope="col">规则检查</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>T01</code></td><td>A</td><td><code>read_file</code> → <code>save_summary</code></td><td class="mark-safe">正常</td></tr>
+                                <tr><td><code>T02</code></td><td>A</td><td><code>read_file</code> → <code>save_summary</code></td><td class="mark-safe">正常</td></tr>
+                                <tr><td><code>T03</code></td><td>A</td><td><code>read_file</code> → <code>delete_file</code>（blocked） → <code>save_summary</code></td><td class="mark-bad">可疑：delete_file</td></tr>
+                                <tr><td><code>T04</code></td><td>A</td><td><code>read_file</code> → <code>save_summary</code></td><td class="mark-safe">正常</td></tr>
+                                <tr><td><code>T05</code></td><td>B</td><td><code>read_file</code> → <code>save_summary</code> → <code>send_file</code>（blocked）</td><td class="mark-bad">可疑：send_file</td></tr>
+                                <tr><td><code>T06</code></td><td>B</td><td><code>read_file</code> → <code>save_summary</code> → <code>delete_file</code>（success）</td><td class="mark-bad">可疑：delete_file</td></tr>
+                                <tr><td><code>T07</code></td><td>B</td><td><code>read_file</code> → <code>save_summary</code></td><td class="mark-safe">正常</td></tr>
+                                <tr><td><code>T08</code></td><td>B</td><td><code>read_file</code> → <code>send_file</code>（blocked） → <code>delete_file</code>（blocked） → <code>save_summary</code></td><td class="mark-bad">可疑：send_file、delete_file</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="note">括号里的状态是数据中记录的 <code>result</code> 字段，<strong>不改变本规则的检查结果</strong>。<code>T08</code> 有两个可疑步骤，但只计为 <strong>1 条可疑轨迹</strong>。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">检查规则</h3>
+                    <div class="prose"><p>8 条轨迹使用相同的任务约束，只检查工具名称是否被当前任务允许：</p></div>
+                    <div class="code-card">
+                        <div class="code-head"><span class="code-name">allowed_tools</span><div class="code-actions"><button class="code-btn" type="button" data-copy="#allow8">复制代码</button></div></div>
+                        <pre class="code" id="allow8">allowed_tools = ["read_file", "save_summary"]</pre>
+                    </div>
+                    <div class="panel" style="margin-top:12px;">
+                        <ul>
+                            <li><code>tool</code> 在 <code>allowed_tools</code> 中：当前步骤不触发本条检查规则。</li>
+                            <li><code>tool</code> 不在 <code>allowed_tools</code> 中：当前步骤标记为可疑，记录轨迹编号和工具名称。</li>
+                            <li>一条轨迹只要包含至少一个可疑步骤，就统计为 <strong>1 条可疑轨迹</strong>，不能按可疑步骤数重复计算。</li>
+                        </ul>
+                    </div>
+                    <p class="note"><code>result</code> 字段不改变本规则的检查结果。例如 <code>delete_file</code> 即使被拦截，仍属于不符合任务工具列表的调用示范。本实验只检查这一条明确的工具白名单规则；工具参数、操作顺序和真实环境状态不纳入本次判定。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">任务一 · 识别可疑训练轨迹</h3>
+                    <div class="prose">
+                        <p><strong>目标：</strong>读取 <code>trajectories.json</code>，逐条检查工具调用，找出不符合 <code>allowed_tools</code> 规则的训练示范。</p>
+                        <p><strong>操作步骤：</strong></p>
+                    </div>
+                    <div class="panel">
+                        <ol>
+                            <li>打开 <code>code/challenge_starter.py</code>，阅读已经提供的 JSON 读取、数据遍历和结果输出框架。</li>
+                            <li>找到负责检查单条轨迹的函数，补全工具名称比较的 <code>TODO 1</code>。</li>
+                            <li>补全可疑信息的记录逻辑（<code>TODO 2</code>），使程序保存轨迹编号、来源、可疑工具和原因。</li>
+                            <li>执行程序，检查是否能正确区分正常轨迹和可疑轨迹。</li>
+                        </ol>
+                    </div>
+                    <div class="prose" style="margin-top:12px;"><p><strong>结果格式示例：</strong></p></div>
+                    <div class="code-card">
+                        <div class="code-head"><span class="code-name">单条结果格式</span><div class="code-actions"><button class="code-btn" type="button" data-copy="#one-line">复制代码</button></div></div>
+                        <pre class="code" id="one-line">[可疑轨迹] T03 | 来源 A | delete_file 不在允许工具列表中</pre>
+                    </div>
+                    <p class="note">这是单条结果的格式示例。完整检测结果按轨迹编号顺序输出，最终以 <code>outputs/expected_output.txt</code> 为核对依据。<strong>检查要点：</strong>能否逐条读取 <code>steps</code>？是否用每条轨迹自身的 <code>allowed_tools</code> 判断？是否将 <code>blocked</code> 的违规请求仍识别为可疑，而没有写成“删除成功”？</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">任务二 · 统计不同来源的可疑比例</h3>
+                    <div class="prose">
+                        <p>在任务一的检测结果基础上，对来源 A 和来源 B 分别统计：<strong>轨迹总数</strong>、<strong>可疑轨迹数</strong>、<strong>可疑比例</strong>。</p>
+                    </div>
+                    <p class="formula">可疑比例 = 该来源可疑轨迹数 ÷ 该来源轨迹总数 × 100%</p>
+                    <div class="panel">
+                        <ol>
+                            <li>继续使用同一个 <code>challenge_starter.py</code>，无需新建程序。</li>
+                            <li>在来源统计部分补全 <code>TODO 3</code>、<code>TODO 4</code>，根据 <code>source</code> 字段累计轨迹总数和可疑轨迹数。</li>
+                            <li>补全比例计算（<code>TODO 5</code>），按百分数保留一位小数输出。</li>
+                            <li>运行程序，与参考输出核对。</li>
+                        </ol>
+                    </div>
+                    <p class="note">注意，统计单位是<strong>轨迹</strong>，不是可疑工具调用步骤。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">代码补全练习 · 综合实验</h3>
+                    <div class="practice-head">
+                        <div class="prose" style="max-width:720px;">
+                            <p>下面默认展示的是待补全的完整框架，5 个 <code>TODO</code> 原样保留。补全后运行，与“参考输出”核对。</p>
+                        </div>
+                        <span class="practice-meta">涉及知识：成员检查、计数、字典累加、百分比计算</span>
+                    </div>
+                    <div class="code-card" style="margin-top:12px;">
+                        <div class="code-head">
+                            <span class="code-name">code/challenge_starter.py</span>
+                            <div class="code-actions">
+                                <button class="code-btn" type="button" data-copy="#c-starter">复制代码</button>
+                                <a class="code-btn" href="code/challenge_starter.py" download>下载</a>
+                            </div>
+                        </div>
+                        <pre class="code" id="c-starter">"""综合实验：补全关键代码，检查 Agent 训练示范轨迹。"""
+
+import json
+from pathlib import Path
+
+
+DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "trajectories.json"
+
+
+def load_traces():
+    """读取模拟训练轨迹数据。"""
+    with DATA_PATH.open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+def find_suspicious_steps(trace):
+    """找出单条轨迹中违反工具白名单规则的步骤。"""
+    findings = []
+    allowed_tools = trace["allowed_tools"]
+
+    for step in trace["steps"]:
+        tool_name = step["tool"]
+
+        # TODO 1：将 False 替换为工具名称不在 allowed_tools 中的判断条件
+        if False:
+            # TODO 2：删除 pass，使用 findings.append(...) 记录工具名称和原因
+            # 记录格式：{"tool": tool_name, "reason": "不在允许工具列表中"}
+            pass
+
+    return findings
+
+
+def audit_traces(traces):
+    """汇总可疑步骤，按轨迹统计各来源的可疑数量。"""
+    suspicious_records = []
+    suspicious_trace_count = 0
+    source_stats = {}
+
+    for trace in traces:
+        trace_id = trace["trace_id"]
+        source = trace["source"]
+        findings = find_suspicious_steps(trace)
+
+        if source not in source_stats:
+            source_stats[source] = {"total": 0, "suspicious": 0}
+
+        # TODO 3：删除 pass，将当前来源的轨迹总数加 1
+        pass
+
+        if findings:
+            suspicious_trace_count += 1
+            # TODO 4：删除 pass，将当前来源的可疑轨迹数加 1
+            # 注意：一条轨迹即使有两个可疑步骤，也只计为一条可疑轨迹
+            pass
+
+        for finding in findings:
+            suspicious_records.append({
+                "trace_id": trace_id,
+                "source": source,
+                "tool": finding["tool"],
+                "reason": finding["reason"],
+            })
+
+    return suspicious_records, suspicious_trace_count, source_stats
+
+
+def print_report(traces, suspicious_records, suspicious_trace_count, source_stats):
+    """打印固定格式的审查报告。"""
+    print("Agent 训练轨迹审查报告")
+    print("========================")
+    print(f"轨迹总数：{len(traces)}")
+    print()
+
+    print("一、可疑工具调用")
+    if not suspicious_records:
+        print("未发现触发本次规则的步骤")
+    else:
+        for record in suspicious_records:
+            print(
+                f"[可疑轨迹] {record['trace_id']} | 来源 {record['source']} | "
+                f"{record['tool']} {record['reason']}"
+            )
+    print(f"可疑步骤数：{len(suspicious_records)}")
+    print(f"可疑轨迹数：{suspicious_trace_count}")
+    print()
+
+    print("二、来源对照")
+    for source in sorted(source_stats):
+        total = source_stats[source]["total"]
+        suspicious = source_stats[source]["suspicious"]
+        percentage = 0.0  # TODO 5：根据 total 和 suspicious 计算百分比
+        print(
+            f"来源 {source}：总数 {total}，可疑 {suspicious}，"
+            f"可疑比例 {percentage:.1f}%"
+        )
+
+
+def main():
+    traces = load_traces()
+    suspicious_records, suspicious_trace_count, source_stats = audit_traces(traces)
+    print_report(traces, suspicious_records, suspicious_trace_count, source_stats)
+
+
+if __name__ == "__main__":
+    main()</pre>
+                    </div>
+                    <details class="answer">
+                        <summary>查看参考答案 · code/challenge_answer.py</summary>
+                        <div class="answer-body">
+                            <div class="code-card">
+                                <div class="code-head">
+                                    <span class="code-name">code/challenge_answer.py</span>
+                                    <div class="code-actions">
+                                        <button class="code-btn" type="button" data-copy="#c-answer">复制代码</button>
+                                    </div>
+                                </div>
+                                <pre class="code" id="c-answer">"""综合实验：审查 Agent 训练示范轨迹，并比较不同来源的可疑比例。"""
+
+import json
+from pathlib import Path
+
+
+DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "trajectories.json"
+
+
+def load_traces():
+    """读取模拟训练轨迹数据。"""
+    with DATA_PATH.open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+def find_suspicious_steps(trace):
+    """找出单条轨迹中违反工具白名单规则的步骤。"""
+    findings = []
+    allowed_tools = trace["allowed_tools"]
+
+    for step in trace["steps"]:
+        tool_name = step["tool"]
+
+        if tool_name not in allowed_tools:
+            findings.append({
+                "tool": tool_name,
+                "reason": "不在允许工具列表中",
+            })
+
+    return findings
+
+
+def audit_traces(traces):
+    """汇总可疑步骤，按轨迹统计各来源的可疑数量。"""
+    suspicious_records = []
+    suspicious_trace_count = 0
+    source_stats = {}
+
+    for trace in traces:
+        trace_id = trace["trace_id"]
+        source = trace["source"]
+        findings = find_suspicious_steps(trace)
+
+        if source not in source_stats:
+            source_stats[source] = {"total": 0, "suspicious": 0}
+
+        source_stats[source]["total"] += 1
+
+        if findings:
+            suspicious_trace_count += 1
+            source_stats[source]["suspicious"] += 1
+
+        for finding in findings:
+            suspicious_records.append({
+                "trace_id": trace_id,
+                "source": source,
+                "tool": finding["tool"],
+                "reason": finding["reason"],
+            })
+
+    return suspicious_records, suspicious_trace_count, source_stats
+
+
+def print_report(traces, suspicious_records, suspicious_trace_count, source_stats):
+    """打印固定格式的审查报告。"""
+    print("Agent 训练轨迹审查报告")
+    print("========================")
+    print(f"轨迹总数：{len(traces)}")
+    print()
+
+    print("一、可疑工具调用")
+    if not suspicious_records:
+        print("未发现触发本次规则的步骤")
+    else:
+        for record in suspicious_records:
+            print(
+                f"[可疑轨迹] {record['trace_id']} | 来源 {record['source']} | "
+                f"{record['tool']} {record['reason']}"
+            )
+    print(f"可疑步骤数：{len(suspicious_records)}")
+    print(f"可疑轨迹数：{suspicious_trace_count}")
+    print()
+
+    print("二、来源对照")
+    for source in sorted(source_stats):
+        total = source_stats[source]["total"]
+        suspicious = source_stats[source]["suspicious"]
+        percentage = (suspicious / total * 100) if total else 0.0
+        print(
+            f"来源 {source}：总数 {total}，可疑 {suspicious}，"
+            f"可疑比例 {percentage:.1f}%"
+        )
+
+
+def main():
+    traces = load_traces()
+    suspicious_records, suspicious_trace_count, source_stats = audit_traces(traces)
+    print_report(traces, suspicious_records, suspicious_trace_count, source_stats)
+
+
+if __name__ == "__main__":
+    main()</pre>
+                            </div>
+                            <div class="code-card">
+                                <div class="code-head"><span class="code-name">outputs/expected_output.txt</span></div>
+                                <pre class="out-block">Agent 训练轨迹审查报告
+========================
+轨迹总数：8
+
+一、可疑工具调用
+[可疑轨迹] T03 | 来源 A | delete_file 不在允许工具列表中
+[可疑轨迹] T05 | 来源 B | send_file 不在允许工具列表中
+[可疑轨迹] T06 | 来源 B | delete_file 不在允许工具列表中
+[可疑轨迹] T08 | 来源 B | send_file 不在允许工具列表中
+[可疑轨迹] T08 | 来源 B | delete_file 不在允许工具列表中
+可疑步骤数：5
+可疑轨迹数：4
+
+二、来源对照
+来源 A：总数 4，可疑 1，可疑比例 25.0%
+来源 B：总数 4，可疑 3，可疑比例 75.0%</pre>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">实验完成结果与自检</h3>
+                    <div class="check-panel">
+                        <h3>程序应该输出这些信息</h3>
+                        <ul class="accept-list">
+                            <li>共读取 <strong>8 条</strong>模拟轨迹。</li>
+                            <li>按轨迹编号列出可疑记录及其未授权工具。</li>
+                            <li>区分<strong>可疑轨迹数</strong>与<strong>可疑步骤数</strong>，来源统计按轨迹去重。</li>
+                            <li>来源 A、B 各有 <strong>4 条</strong>轨迹；来源 A 有 <strong>1 条</strong>可疑轨迹，来源 B 有 <strong>3 条</strong>可疑轨迹。</li>
+                            <li>来源 A、B 的可疑比例分别为 <strong>25.0%</strong> 和 <strong>75.0%</strong>。</li>
+                            <li><code>T08</code> 的两个可疑步骤只计为 <strong>1 条可疑轨迹</strong>；参考输出中共 5 个可疑步骤、4 条可疑轨迹。</li>
+                        </ul>
+                        <div class="checklist">
+                            <label class="check-item"><input type="checkbox" data-check> 我读到 8 条轨迹，并能逐条看到工具调用。</label>
+                            <label class="check-item"><input type="checkbox" data-check> 我的程序列出了 T03、T05、T06、T08 四条可疑轨迹。</label>
+                            <label class="check-item"><input type="checkbox" data-check> 我把“可疑步骤数 5”和“可疑轨迹数 4”分开了。</label>
+                            <label class="check-item"><input type="checkbox" data-check> 来源 A、B 的可疑比例分别是 25.0% 和 75.0%。</label>
+                            <label class="check-item"><input type="checkbox" data-check> 我没有把 blocked 写成“删除成功”。</label>
+                            <label class="check-item"><input type="checkbox" data-check> 我的输出与 outputs/expected_output.txt 逐项一致。</label>
+                        </div>
+                        <div class="check-progress">
+                            <div class="progress-track"><div class="progress-fill" id="check-progress"></div></div>
+                            <span class="check-count" id="check-count">0 / 6</span>
+                        </div>
+                    </div>
+                    <div class="resource-row">
+                        <a class="resource-btn" href="agent_trace_starter.zip" download>下载 starter 压缩包</a>
+                        <a class="resource-btn" href="data/trajectories.json" download>下载 trajectories.json</a>
+                        <a class="resource-btn" href="outputs/expected_output.txt" download>下载参考输出</a>
+                        <a class="resource-btn" href="code/challenge_starter.py" download>下载 challenge_starter.py</a>
+                    </div>
+                    <p class="note">完整程序输出与 <code>outputs/expected_output.txt</code> 逐项对照；如有不一致，优先检查工具名称判断、轨迹去重和来源计数。<strong>本次实验成果：</strong>一份补全后的 Python 轨迹检查程序，以及该程序生成的可疑轨迹与来源对照结果。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="contact" aria-labelledby="contact-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Conclusion · 结论与联系</p>
+                    <h2 id="contact-title">规则能发现什么，又不能证明什么</h2>
+                    <p>本实验展示了如何在模型训练前，使用简单且可解释的规则检查 Agent 示范轨迹中的可疑工具调用，并对不同来源的数据进行基本比较。</p>
+                </div>
+
+                <div class="definition" style="padding:24px 26px;border-radius:18px;color:white;background:#183638;">
+                    <p class="section-kicker" style="margin:0 0 7px;color:#a3d8c0;">How To Read The Result</p>
+                    <p style="margin:10px 0 0;color:#d3e0dd;font-size:0.92rem;">规则检查能够发现明确违反工具列表的示范，但无法替代复杂的数据投毒识别。<strong style="color:white;">可疑轨迹、恶意投毒、训练后行为危害</strong>是需要分别验证的不同问题。</p>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-main">
+                        <h3>接应人：付于文</h3>
+                        <p>Agent 轨迹安全方向研究生。对 Agent 轨迹安全、训练数据投毒及来源追踪方向感兴趣，可以联系交流；卡在某一步也可以直接来问，不用先全部做完。</p>
+                        <div class="contact-line"><span>联系方式</span><strong>QQ 3344501916</strong></div>
+                        <div class="contact-line"><span>添加好友</span><span style="color:var(--muted);">备注来意即可，联系属于感兴趣后的自愿交流</span></div>
+                        <div class="resource-row">
+                            <a class="resource-btn" href="agent_trace_starter.zip" download>下载 starter 压缩包</a>
+                            <a class="resource-btn" href="../../agentlab/">返回 AgentLab 实验列表</a>
+                        </div>
+                    </div>
+                    <div class="boundary-card">
+                        <h3>需要区分的三件事</h3>
+                        <ul>
+                            <li><strong>可疑示范</strong>：依据明确任务规则被标记的轨迹，不等同于已确认的恶意投毒样本。</li>
+                            <li><strong>来源差异</strong>：两个来源的可疑比例不同，只是对这批模拟数据的描述性统计，不足以证明某一来源实施了攻击。</li>
+                            <li><strong>模型行为影响</strong>：训练数据中存在可疑操作，不能直接证明训练后的 Agent 会出现对应行为；这一问题需要独立的训练与行为对照实验。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="safety-note" style="margin-top:18px;">
+                    <strong>数据说明：</strong>本实验中的文件名、任务、工具调用和数据来源均为教学用途的模拟内容，不会对真实文件或外部设备执行操作。具体数据字段、题目、代码与参考结果由配套文件分别提供。以上区别与 Agent 轨迹数据投毒、来源追踪及行为级审计的后续研究相衔接。
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="shell">
+        <div class="footer-inner">
+            <span>TraceLab · Agent 轨迹投毒侦探 · 模拟轨迹与虚拟工具</span>
+            <span>版式参考 AgentLab · 内容：付于文 · 用于教学与实验设计讨论</span>
+        </div>
+    </footer>
+
+    <script>
+        // 选择题：点击选项立即给出对错与解析，可反复更换选项
+        document.querySelectorAll(".quiz-card").forEach(function (card) {
+            const options = Array.from(card.querySelectorAll(".option"));
+            const feedback = card.querySelector(".quiz-feedback");
+            options.forEach(function (option) {
+                option.addEventListener("click", function () {
+                    const isCorrect = option.dataset.correct === "true";
+                    options.forEach(function (item) {
+                        item.removeAttribute("aria-pressed");
+                        item.classList.remove("is-correct", "is-wrong");
+                    });
+                    option.setAttribute("aria-pressed", "true");
+                    option.classList.add(isCorrect ? "is-correct" : "is-wrong");
+                    const answer = options.find(function (item) { return item.dataset.correct === "true"; });
+                    const answerKey = answer ? answer.querySelector(".key").textContent : "";
+                    feedback.className = "quiz-feedback show " + (isCorrect ? "ok" : "no");
+                    feedback.innerHTML = "";
+                    const head = document.createElement("strong");
+                    head.textContent = (isCorrect ? "回答正确" : "回答不正确") + " · 标准答案 " + answerKey;
+                    const body = document.createElement("span");
+                    body.textContent = option.dataset.feedback;
+                    const ans = document.createElement("span");
+                    ans.className = "ans";
+                    ans.textContent = "可以再点其他选项对比；正确答案与解析不记录、不排名。";
+                    feedback.appendChild(head);
+                    feedback.appendChild(body);
+                    feedback.appendChild(ans);
+                });
+            });
+        });
+
+        // 参考答案：展开后标题变成“收起”，再点一次收起
+        document.querySelectorAll("details.answer").forEach(function (details) {
+            const summary = details.querySelector("summary");
+            const original = summary.textContent;
+            const collapsed = original.replace("收起参考答案", "查看参考答案");
+            const opened = original.replace("查看参考答案", "收起参考答案");
+            details.addEventListener("toggle", function () {
+                summary.textContent = details.open ? opened : collapsed;
+            });
+        });
+
+        // 复制代码
+        function legacyCopy(text) {
+            const area = document.createElement("textarea");
+            area.value = text;
+            area.setAttribute("readonly", "");
+            area.style.position = "fixed";
+            area.style.top = "-1000px";
+            document.body.appendChild(area);
+            area.select();
+            let done = false;
+            try {
+                done = document.execCommand("copy");
+            } catch (error) {
+                done = false;
+            }
+            document.body.removeChild(area);
+            return done ? Promise.resolve() : Promise.reject(new Error("copy blocked"));
+        }
+
+        function copyText(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text).catch(function () {
+                    return legacyCopy(text);
+                });
+            }
+            return legacyCopy(text);
+        }
+
+        document.querySelectorAll("[data-copy]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const target = document.querySelector(button.dataset.copy);
+                if (!target) return;
+                const original = button.textContent;
+                copyText(target.textContent).then(function () {
+                    button.textContent = "已复制";
+                }).catch(function () {
+                    try {
+                        const range = document.createRange();
+                        range.selectNodeContents(target);
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        button.textContent = "已选中，按 Ctrl+C";
+                    } catch (error) {
+                        button.textContent = "复制失败，请手动选择";
+                    }
+                }).then(function () {
+                    setTimeout(function () { button.textContent = original; }, 1600);
+                });
+            });
+        });
+
+        // 自检进度
+        const checks = Array.from(document.querySelectorAll("[data-check]"));
+        function updateChecks() {
+            const done = checks.filter(function (item) { return item.checked; }).length;
+            const fill = document.getElementById("check-progress");
+            const count = document.getElementById("check-count");
+            if (!fill || !count) return;
+            count.textContent = done + " / " + checks.length;
+            fill.style.width = (done / checks.length) * 100 + "%";
+        }
+        checks.forEach(function (item) { item.addEventListener("change", updateChecks); });
+        updateChecks();
+    </script>
+</body>
+</html>

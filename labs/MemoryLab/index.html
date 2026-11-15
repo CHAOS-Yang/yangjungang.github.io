@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="记忆来源归属实验：先做六次来源判断，再给虚构记账助手加一条记忆，比较严格模式与多数模式会不会把混合内容归错。">
+    <meta name="theme-color" content="#f4f7f4">
+    <title>这段记忆，到底是谁的？| AgentLab 本科实验</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #183638;
+            --muted: #5d7270;
+            --paper: #f4f7f4;
+            --card: #ffffff;
+            --line: #dce7e1;
+            --green: #087e68;
+            --green-dark: #075e52;
+            --mint: #d9f4e7;
+            --orange: #ff895f;
+            --lavender: #e9e8ff;
+            --shadow: 0 20px 60px rgba(25, 59, 52, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        [id] { scroll-margin-top: 18px; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 88% 2%, rgba(233, 232, 255, 0.85), transparent 24rem),
+                var(--paper);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.7;
+            letter-spacing: 0;
+        }
+
+        a { color: inherit; }
+        a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+            outline: 3px solid var(--orange);
+            outline-offset: 3px;
+        }
+
+        .shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+
+        .topbar {
+            display: flex;
+            min-height: 80px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            border-bottom: 1px solid rgba(24, 54, 56, 0.1);
+        }
+        .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand-mark {
+            display: grid;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            border-radius: 13px 13px 13px 4px;
+            color: white;
+            background: var(--green);
+            font-size: 0.8rem;
+            font-weight: 900;
+        }
+        .brand-name { display: block; font-size: 1.02rem; font-weight: 850; }
+        .brand-sub { display: block; margin-top: -3px; color: var(--muted); font-size: 0.7rem; font-weight: 600; }
+        .nav { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+        .nav a { color: var(--muted); font-size: 0.86rem; font-weight: 650; text-decoration: none; }
+        .nav a:hover { color: var(--green); }
+        .nav .home-link { padding: 9px 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.02fr 0.98fr;
+            align-items: stretch;
+            gap: 42px;
+            padding: 54px 0 34px;
+        }
+        .hero > div:first-child { display: flex; flex-direction: column; justify-content: center; }
+        .kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            align-self: flex-start;
+            padding: 7px 12px;
+            border: 1px solid #cfe5da;
+            border-radius: 999px;
+            color: var(--green-dark);
+            background: rgba(255, 255, 255, 0.72);
+            font-size: 0.8rem;
+            font-weight: 750;
+        }
+        .kicker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(255, 137, 95, 0.16); }
+        h1 { margin: 21px 0 16px; max-width: 640px; font-size: 2.85rem; line-height: 1.2; }
+        h1 .accent { color: var(--green); }
+        .hero-copy { max-width: 600px; color: var(--muted); font-size: 1.02rem; }
+        .hero-copy strong { color: var(--ink); }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 24px; }
+        .button {
+            display: inline-flex;
+            min-height: 47px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 18px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font: inherit;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease;
+        }
+        .button:hover { transform: translateY(-2px); }
+        .button-primary { color: white; background: var(--green); box-shadow: 0 10px 22px rgba(8, 126, 104, 0.2); }
+        .button-primary:hover { background: var(--green-dark); }
+        .button-secondary { border-color: var(--line); color: var(--ink); background: rgba(255,255,255,0.78); }
+        .hero-notes { display: flex; flex-wrap: wrap; gap: 8px 17px; margin-top: 20px; color: var(--muted); font-size: 0.85rem; }
+        .hero-notes span::before { content: "✓"; margin-right: 6px; color: var(--green); font-weight: 900; }
+
+        .example-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 21px;
+            border: 1px solid rgba(255,255,255,0.86);
+            border-radius: 26px;
+            background: linear-gradient(155deg, #eef0ff 0%, #e4f5ec 60%, #e7f8ee 100%);
+            box-shadow: var(--shadow);
+        }
+        .example-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .example-title { color: var(--green-dark); font-size: 0.74rem; font-weight: 900; }
+        .example-badge { padding: 3px 8px; border-radius: 999px; color: #5652a0; background: rgba(233,232,255,0.9); font-size: 0.66rem; font-weight: 850; }
+        .example-body {
+            margin-top: 11px;
+            padding: 13px 14px;
+            border-radius: 11px;
+            color: #e8f2ee;
+            background: var(--ink);
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.73rem;
+            line-height: 1.75;
+            white-space: pre-wrap;
+        }
+        .example-verdict { display: inline-flex; align-self: flex-start; margin-top: 10px; padding: 5px 10px; border-radius: 999px; color: var(--green-dark); background: rgba(217,244,231,0.95); font-size: 0.72rem; font-weight: 850; }
+
+        .toc-strip { padding: 0 0 40px; }
+        .toc { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 18px; border-top: 1px solid rgba(24, 54, 56, 0.08); }
+        .toc-label { align-self: center; margin-right: 4px; color: var(--muted); font-size: 0.76rem; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; }
+        .toc a {
+            padding: 8px 13px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 0.82rem;
+            font-weight: 750;
+            text-decoration: none;
+        }
+        .toc a:hover { border-color: #b9d8c9; color: var(--green); }
+
+        .section { padding: 60px 0; }
+        .section-white { border-top: 1px solid rgba(24,54,56,0.06); border-bottom: 1px solid rgba(24,54,56,0.06); background: rgba(255,255,255,0.7); }
+        .section-heading { max-width: 980px; margin-bottom: 24px; }
+        .section-kicker { margin: 0 0 7px; color: var(--green); font-size: 0.74rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; }
+        h2 { margin: 0; font-size: 2.1rem; line-height: 1.26; }
+        h3 { font-size: 1.1rem; line-height: 1.4; }
+        .section-heading p { margin: 10px 0 0; color: var(--muted); }
+        code { font-family: "Cascadia Code", Consolas, "Courier New", monospace; font-size: 0.88em; }
+        .prose { color: var(--muted); font-size: 0.94rem; }
+        .prose p { margin: 0 0 12px; }
+        .prose strong { color: var(--ink); }
+        .block { margin-top: 22px; }
+        .block:first-child { margin-top: 0; }
+        .block-title { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; font-size: 1.06rem; }
+        .block-title .idx { color: var(--green); font-family: "Cascadia Code", Consolas, monospace; font-size: 0.82rem; font-weight: 900; }
+
+        .quiz-stack { display: grid; gap: 13px; margin-top: 14px; }
+        .quiz-card { padding: 19px 20px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 10px 30px rgba(25,59,52,0.05); }
+        .quiz-num { margin: 0 0 4px; color: var(--green); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+        .quiz-q { margin: 0; font-size: 0.95rem; }
+        .judge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+        .judge-btn {
+            min-width: 92px;
+            min-height: 40px;
+            padding: 0 16px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--ink);
+            background: #fbfdfc;
+            font: inherit;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: border-color 0.16s ease, background 0.16s ease;
+        }
+        .judge-btn:hover { border-color: #b9d8c9; background: #f4fbf7; }
+        .judge-btn[aria-pressed="true"] { border-color: var(--green); background: #eefaf4; box-shadow: 0 0 0 1px var(--green) inset; }
+        .judge-feedback { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 0.86rem; }
+        .judge-feedback.show { display: block; }
+        .judge-feedback.ok { border: 1px solid #bfe3d1; background: #effaf4; }
+        .judge-feedback.no { border: 1px solid #f3cdbf; background: #fff5f0; }
+        .judge-feedback.unsure { border: 1px solid #ddd7f5; background: #f5f3ff; }
+        .judge-feedback strong { display: block; margin-bottom: 3px; }
+        .judge-feedback.ok strong { color: var(--green-dark); }
+        .judge-feedback.no strong { color: #a14428; }
+        .judge-feedback.unsure strong { color: #5652a0; }
+        .judge-feedback .choice-line { display: block; margin-bottom: 5px; color: var(--muted); font-size: 0.79rem; }
+
+        .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: white; }
+        table { width: 100%; min-width: 540px; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eaf1ed; vertical-align: top; }
+        th { color: var(--green-dark); background: #f7faf8; font-size: 0.73rem; font-weight: 850; }
+        tbody tr:last-child td { border-bottom: 0; }
+        td code { font-size: 0.82em; }
+
+        .panel { padding: 16px 17px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+        .panel h4 { margin: 0 0 8px; font-size: 0.92rem; }
+        .panel ul, .panel ol { margin: 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.86rem; }
+        .panel li + li { margin-top: 5px; }
+        .panel strong { color: var(--ink); }
+        .note { margin-top: 14px; padding: 13px 15px; border: 1px dashed #c9ded3; border-radius: 11px; color: var(--muted); background: #fbfdfc; font-size: 0.86rem; }
+        .note strong { color: var(--green-dark); }
+        .split-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-top: 14px; }
+        .split-grid .panel h4 { color: var(--green-dark); }
+        .split-grid .panel.muted h4 { color: #5652a0; }
+
+        .code-card { overflow: hidden; border: 1px solid #14383b; border-radius: 13px; background: #0f2c2f; }
+        .code-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 13px; background: #153a3d; }
+        .code-name { color: #a9d3c4; font-family: "Cascadia Code", Consolas, monospace; font-size: 0.74rem; }
+        .code-btn {
+            padding: 5px 10px;
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 7px;
+            color: #dcece5;
+            background: rgba(255,255,255,0.08);
+            font: inherit;
+            font-size: 0.74rem;
+            font-weight: 750;
+            cursor: pointer;
+        }
+        .code-btn:hover { background: rgba(255,255,255,0.18); }
+        pre.code {
+            margin: 0;
+            padding: 14px 16px;
+            overflow-x: auto;
+            color: #e8f2ee;
+            font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            tab-size: 4;
+        }
+        .out-card { overflow: hidden; border: 1px solid #14383b; border-radius: 13px; background: #0b2427; }
+        pre.out-block {
+            margin: 0;
+            padding: 13px 16px;
+            overflow-x: auto;
+            color: #d7e8e2;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.76rem;
+            line-height: 1.75;
+        }
+
+        .task-card { padding: 23px; border: 1px solid #cfe5da; border-radius: 19px; background: linear-gradient(145deg, #ffffff 0%, #f2fbf6 100%); box-shadow: var(--shadow); }
+        .task-top { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .task-badge { padding: 5px 10px; border-radius: 999px; color: var(--green-dark); background: var(--mint); font-size: 0.73rem; font-weight: 850; }
+        .task-badge.orange { color: #a75424; background: #fff0df; }
+        .task-badge.lav { color: #5652a0; background: var(--lavender); }
+        .task-grid { display: grid; gap: 1px; overflow: hidden; border: 1px solid #e1eee7; border-radius: 12px; background: #e1eee7; }
+        .task-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); background: white; }
+        .task-label { padding: 13px 15px; color: var(--green-dark); background: #f3faf6; font-size: 0.82rem; font-weight: 850; }
+        .task-value { padding: 13px 15px; font-size: 0.87rem; }
+        .contact-value { color: var(--green-dark); font-weight: 800; }
+        .mail-link { color: var(--green-dark); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+        .resource-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .resource-btn { display: inline-flex; min-height: 38px; align-items: center; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--green-dark); background: white; font-size: 0.81rem; font-weight: 750; text-decoration: none; }
+        .resource-btn:hover { border-color: #b9d8c9; background: #f7fbf9; }
+        .resource-btn.solid { border-color: var(--green); color: white; background: var(--green); }
+        .resource-btn.solid:hover { background: var(--green-dark); }
+
+        .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 15px; counter-reset: step; }
+        .step { padding: 14px 12px 13px 39px; position: relative; border: 1px solid var(--line); border-radius: 11px; background: white; counter-increment: step; }
+        .step::before { content: counter(step); position: absolute; left: 12px; top: 14px; display: grid; width: 19px; height: 19px; place-items: center; border-radius: 50%; color: white; background: var(--green); font-size: 0.64rem; font-weight: 900; }
+        .step strong { display: block; font-size: 0.83rem; }
+        .step span { display: block; margin-top: 3px; color: var(--muted); font-size: 0.76rem; }
+
+        .result-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+        .result-card { padding: 16px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+        .result-card h4 { margin: 0 0 6px; font-size: 0.9rem; }
+        .result-card p { margin: 0 0 10px; color: var(--muted); font-size: 0.82rem; }
+        .result-card .out-block { border: 1px solid #14383b; border-radius: 9px; font-size: 0.72rem; }
+
+        .boundary-card { padding: 20px 22px; border: 1px solid #f3d3c7; border-radius: 16px; background: #fff8f5; }
+        .boundary-card h3 { margin: 0 0 8px; color: #a14428; font-size: 1rem; }
+        .boundary-card ul { margin: 0; padding-left: 1.1rem; color: #7b4a38; font-size: 0.86rem; }
+        .boundary-card li + li { margin-top: 6px; }
+        .boundary-card strong { color: #a14428; }
+
+        .contact-card { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 18px; margin-top: 16px; }
+        .contact-main { padding: 22px; border: 1px solid #cfe5da; border-radius: 16px; background: linear-gradient(145deg, #ffffff 0%, #f2fbf6 100%); }
+        .contact-main h3 { margin: 0 0 8px; font-size: 1.04rem; }
+        .contact-main p { margin: 0 0 10px; color: var(--muted); font-size: 0.88rem; }
+        .contact-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; padding: 10px 12px; border: 1px solid #e1eee7; border-radius: 10px; background: white; font-size: 0.88rem; }
+        .contact-line + .contact-line { margin-top: 8px; }
+        .contact-line span:first-child { color: var(--muted); font-size: 0.78rem; font-weight: 800; }
+
+        details.appendix { margin-top: 13px; border: 1px solid var(--line); border-radius: 13px; background: white; overflow: hidden; }
+        details.appendix > summary { padding: 14px 16px; color: var(--green-dark); font-size: 0.9rem; font-weight: 850; cursor: pointer; }
+        .appendix-body { padding: 0 16px 16px; }
+        .appendix-body > * + * { margin-top: 12px; }
+
+        footer { padding: 26px 0 36px; color: var(--muted); font-size: 0.83rem; }
+        .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; padding-top: 20px; border-top: 1px solid var(--line); }
+
+        @media (max-width: 920px) {
+            .hero { grid-template-columns: 1fr; gap: 28px; padding: 46px 0 30px; }
+            h1 { font-size: 2.4rem; }
+            h2 { font-size: 1.85rem; }
+            .split-grid, .result-grid, .contact-card { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .nav a:not(.home-link) { display: none; }
+        }
+
+        @media (max-width: 680px) {
+            .shell { width: min(100% - 28px, 560px); }
+            .topbar { min-height: 70px; }
+            h1 { font-size: 1.95rem; }
+            h2 { font-size: 1.55rem; }
+            .section { padding: 44px 0; }
+            .steps { grid-template-columns: 1fr; }
+            .task-row { grid-template-columns: 1fr; }
+            .task-label { padding-bottom: 4px; }
+            .task-value { padding-top: 4px; }
+            .judge-btn { flex: 1 1 30%; min-width: 0; }
+            pre.code, pre.out-block { font-size: 0.73rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="shell topbar">
+        <a class="brand" href="#top" aria-label="记忆来源归属实验首页">
+            <span class="brand-mark">记忆</span>
+            <span><span class="brand-name">MemoryLab</span><span class="brand-sub">记忆来源归属实验</span></span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+            <a href="#judge">先做六次判断</a>
+            <a href="#rules">两种规则</a>
+            <a href="#results">三个真实结果</a>
+            <a href="#task">小任务</a>
+            <a href="#boundary">实验边界</a>
+            <a class="home-link" href="../../agentlab/">返回 AgentLab ↗</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="shell hero" aria-labelledby="hero-title">
+            <div>
+                <span class="kicker"><span class="kicker-dot"></span>新手实验 · 不用模型和 API</span>
+                <h1 id="hero-title">记账助手把你的话和工具账单记在一起，<span class="accent">这条记忆该归给谁？</span></h1>
+                <p class="hero-copy">
+                    你说过“我不吃香菜”，账单工具返回“上月餐饮支出 1180 元”。两句话合并到同一条记忆后，系统却想给它贴一个来源标签。<strong>大部分内容来自你，能不能把整条都归给你？</strong>先做六次判断，再用一段 Python 看看两种规则的区别。
+                </p>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#judge">先做六次判断 <span aria-hidden="true">→</span></a>
+                    <a class="button button-secondary" href="memory_starter.zip" download>下载实验包（memory_starter.zip）</a>
+                </div>
+                <div class="hero-notes">
+                    <span>11 条模拟记录</span>
+                    <span>只用 Python 标准库</span>
+                    <span>首次任务约 1–2 小时</span>
+                </div>
+            </div>
+
+            <aside class="example-card" aria-label="一条混合来源记忆的真实记录">
+                <div class="example-head">
+                    <span class="example-title">示例卡 · 真实记录 N3</span>
+                    <span class="example-badge">模拟数据</span>
+                </div>
+                <div class="example-body">申报来源：U+T（U：用户对话；T：账单工具）
+① 我不吃香菜             锚点 827686f7 → 命中 U
+② 我房租每月 2800 元      锚点 3b121b44 → 命中 U
+③ 上月餐饮支出 1180 元    锚点 a321b52e → 命中 T
+④ 上月房租支出 2800 元    锚点 84169216 → 命中 T
+
+严格模式：attributed(T+U)，接受与证据一致的混合来源
+多数模式：attributed(U)，把混合记忆错误地压成了单一来源</div>
+                <span class="example-verdict">证据都在，多数规则仍然丢掉了混合来源</span>
+            </aside>
+        </section>
+
+        <div class="shell toc-strip">
+            <nav class="toc" aria-label="页面目录">
+                <a href="#judge">六次来源判断</a>
+                <a href="#rules">两种规则差在哪</a>
+                <a href="#results">先观察三个结果</a>
+                <a href="#task">你的第一次小任务</a>
+                <a href="#advanced">可选进阶</a>
+                <a href="#boundary">需要记住的边界</a>
+            </nav>
+        </div>
+
+        <section class="section section-white" id="judge" aria-labelledby="judge-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Try It · 先玩一下</p>
+                    <h2 id="judge-title">六段记忆，你来判断</h2>
+                    <p>锚点是每句话留下的来源短码，用对应来源的密钥重算能对上，才算有来源证据。先不用懂计算公式。</p>
+                </div>
+                <div class="panel" style="margin-bottom:16px;">
+                    <p style="margin:0;color:var(--muted);font-size:0.9rem;">每题只问：<strong style="color:var(--ink);">现有证据是否足以把整条记忆归给它申报的来源？</strong>选项为“能 / 不能 / 说不清”。先选，再看解析。这里的判断采用严格证据标准。选择只保存在当前页面，刷新即清空，不收集任何个人信息。</p>
+                </div>
+
+                <div class="quiz-stack">
+                    <div class="quiz-card" data-judge>
+                        <p class="quiz-num">第 1 题</p>
+                        <p class="quiz-q">三句话都能对上用户 U 的锚点，申报来源 U。</p>
+                        <div class="judge-row">
+                            <button class="judge-btn" type="button" data-choice="能">能</button>
+                            <button class="judge-btn" type="button" data-choice="不能">不能</button>
+                            <button class="judge-btn" type="button" data-choice="说不清">说不清</button>
+                        </div>
+                        <div class="judge-feedback" data-answer="能" data-explain="每句都有证据，命中来源集合与申报一致。多来源记忆也可以被接受，前提是完整证据与申报来源集合一致。" aria-live="polite"></div>
+                    </div>
+
+                    <div class="quiz-card" data-judge>
+                        <p class="quiz-num">第 2 题</p>
+                        <p class="quiz-q">三句话都能对上账单工具 T 的锚点，申报来源 T。</p>
+                        <div class="judge-row">
+                            <button class="judge-btn" type="button" data-choice="能">能</button>
+                            <button class="judge-btn" type="button" data-choice="不能">不能</button>
+                            <button class="judge-btn" type="button" data-choice="说不清">说不清</button>
+                        </div>
+                        <div class="judge-feedback" data-answer="能" data-explain="归属要判断证据指向谁，不判断内容是否正确、是否安全。" aria-live="polite"></div>
+                    </div>
+
+                    <div class="quiz-card" data-judge>
+                        <p class="quiz-num">第 3 题</p>
+                        <p class="quiz-q">两句命中 U，两句命中 T，锚点全部完好，申报来源只有 U。</p>
+                        <div class="judge-row">
+                            <button class="judge-btn" type="button" data-choice="能">能</button>
+                            <button class="judge-btn" type="button" data-choice="不能">不能</button>
+                            <button class="judge-btn" type="button" data-choice="说不清">说不清</button>
+                        </div>
+                        <div class="judge-feedback" data-answer="不能" data-explain="来源集合应包括 U 和 T。严格模式会报告 partial(T+U)，拒绝按当前申报整体接受。若申报本来就是 U+T，则可以接受；示例卡 N3 正是后者。" aria-live="polite"></div>
+                    </div>
+
+                    <div class="quiz-card" data-judge>
+                        <p class="quiz-num">第 4 题</p>
+                        <p class="quiz-q">三句命中 U，另有一句工具内容但锚点被删，申报来源 U。</p>
+                        <div class="judge-row">
+                            <button class="judge-btn" type="button" data-choice="能">能</button>
+                            <button class="judge-btn" type="button" data-choice="不能">不能</button>
+                            <button class="judge-btn" type="button" data-choice="说不清">说不清</button>
+                        </div>
+                        <div class="judge-feedback" data-answer="不能" data-explain="第四句没有可验证来源，不能因其他三句属于 U 就把它也算作 U。严格模式会保留已知来源并输出 partial(U)。" aria-live="polite"></div>
+                    </div>
+
+                    <div class="quiz-card" data-judge>
+                        <p class="quiz-num">第 5 题</p>
+                        <p class="quiz-q">三句内容还在，但全部没有锚点，申报来源 U。</p>
+                        <div class="judge-row">
+                            <button class="judge-btn" type="button" data-choice="能">能</button>
+                            <button class="judge-btn" type="button" data-choice="不能">不能</button>
+                            <button class="judge-btn" type="button" data-choice="说不清">说不清</button>
+                        </div>
+                        <div class="judge-feedback" data-answer="说不清" data-explain="一条来源证据也没有，严格模式输出 unknown。证据丢失本身不等于伪造成功。" aria-live="polite"></div>
+                    </div>
+
+                    <div class="quiz-card" data-judge>
+                        <p class="quiz-num">第 6 题</p>
+                        <p class="quiz-q">三句命中 U，第四句换成了工具内容，却保留某句旧的用户内容锚点，申报来源 U。</p>
+                        <div class="judge-row">
+                            <button class="judge-btn" type="button" data-choice="能">能</button>
+                            <button class="judge-btn" type="button" data-choice="不能">不能</button>
+                            <button class="judge-btn" type="button" data-choice="说不清">说不清</button>
+                        </div>
+                        <div class="judge-feedback" data-answer="不能" data-explain="旧锚点对不上新内容，只能确认其余三句的来源。验证器不能单凭失配判断是恶意篡改，还是更新时忘记重签。" aria-live="polite"></div>
+                    </div>
+                </div>
+
+                <p class="note">做完后，你已经练习了三个动作：检查证据、比较申报、在证据不足时拒绝整体归属。</p>
+            </div>
+        </section>
+
+        <section class="section" id="rules" aria-labelledby="rules-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Two Rules · 两种规则究竟差在哪</p>
+                    <h2 id="rules-title">严格模式与故意粗糙的多数模式</h2>
+                </div>
+                <div class="split-grid">
+                    <div class="panel">
+                        <h4>严格模式</h4>
+                        <p style="margin:0;color:var(--muted);font-size:0.86rem;">要求现存句子<strong style="color:var(--ink);">全部命中</strong>，且命中来源集合<strong style="color:var(--ink);">与申报一致</strong>。</p>
+                    </div>
+                    <div class="panel muted">
+                        <h4>多数模式</h4>
+                        <p style="margin:0;color:var(--muted);font-size:0.86rem;">只看命中最多的来源是否占全部现存句子<strong style="color:var(--ink);">至少 50%</strong>，达到就把整条归给它；平票时取字母序较大的来源，因此 U/T 平票取 U。这是故意粗糙的对照规则。</p>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">两种模式都会输出这些状态，但接受条件不同</h3>
+                    <div class="table-wrap">
+                        <table aria-label="三种判定状态">
+                            <thead><tr><th scope="col">状态</th><th scope="col">含义</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>attributed</code></td><td>规则接受了归属；是否正确还要比对真值</td></tr>
+                                <tr><td><code>partial</code></td><td>有来源命中，但不足以按该规则整体接受；仍可报告已识别来源</td></tr>
+                                <tr><td><code>unknown</code></td><td>一句来源也未命中</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="note"><strong>“错误归属”由评测端判断：</strong>系统已接受，但输出来源集合与真实来源集合不一致。它不是验证器额外输出的第四种状态。</p>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title">为什么实验拆成两个文件</h3>
+                    <div class="split-grid">
+                        <div class="panel">
+                            <h4>memory_store.json</h4>
+                            <p style="margin:0;color:var(--muted);font-size:0.86rem;">提供记忆和虚构密钥。判定函数 <code>verify_record()</code> 读它，<strong style="color:var(--ink);">不读取 truth</strong>。</p>
+                        </div>
+                        <div class="panel">
+                            <h4>truth.json</h4>
+                            <p style="margin:0;color:var(--muted);font-size:0.86rem;">存评测端真实来源集合及扰动前应有句数。只有评测函数 <code>verify()</code> 才用它打分。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="results" aria-labelledby="results-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Three Real Results · 先观察三个真实结果</p>
+                    <h2 id="results-title">同一个证据，两种规则给出不同结论</h2>
+                </div>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h4>一句外来内容，多数模式仍接受</h4>
+                        <p>A2 有四句用户内容和一句工具内容，工具句锚点被删，申报 U。</p>
+                        <pre class="out-block">严格：partial(U)      覆盖 0.80
+多数：attributed(U)   覆盖 0.80</pre>
+                        <p style="margin-top:9px;">多数规则把 4/5 当作整体来源依据，输出与真实来源集合 U+T 不一致。</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>合法混合也会被归错</h4>
+                        <p>N3 有两句 U、两句 T，证据完整，申报 U+T。</p>
+                        <pre class="out-block">严格：attributed(T+U)   覆盖 1.00
+多数：attributed(U)     覆盖 1.00</pre>
+                        <p style="margin-top:9px;">证据都在，多数规则仍丢失了混合来源信息。</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>来源对上，不代表内容完整</h4>
+                        <p>A6 原本四句，删除两句，剩下两句的锚点完好，申报 U。</p>
+                        <pre class="out-block">严格：attributed(U)   覆盖 0.50
+多数：attributed(U)   覆盖 0.50</pre>
+                        <p style="margin-top:9px;">判定器看见的是两句、两句都命中；只有评测端知道原本应有四句。</p>
+                    </div>
+                </div>
+                <p class="note">所以“严格错误接受率 0/5”<strong>不代表所有攻击都被发现</strong>。来源集合没有错时，完整性不足只能靠评测端对照真值发现。</p>
+            </div>
+        </section>
+
+        <section class="section" id="task" aria-labelledby="task-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Your Turn · 你的第一次小任务</p>
+                    <h2 id="task-title">新增一条记忆，解释一次结果</h2>
+                    <p>不需要模型和 API。先写一个预测，再动手改一行数据，最后对照两种规则的实际输出。</p>
+                </div>
+                <div class="task-card">
+                    <div class="task-top">
+                        <span class="task-badge">约 1–2 小时</span>
+                        <span class="task-badge">需要基础 Python</span>
+                        <span class="task-badge orange">不需要模型和 API</span>
+                        <span class="task-badge lav">首次任务</span>
+                    </div>
+                    <div class="task-grid">
+                        <div class="task-row">
+                            <div class="task-label">做什么</div>
+                            <div class="task-value">
+                                先写一个预测：“混入一句工具内容后，多数模式是否仍把整条归给用户？”下载并运行原始 11 条记录，在 <code>build()</code> 中新增一条自己的记录，再运行两种规则，对照预测与实际输出。README 给了一条“3 句 U + 1 句 T”的完整插入示例；你可以照着跑通，再改句数或锚点方式。重点是解释一次结果，不是追求攻击成功。
+                            </div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">需要什么基础</div>
+                            <div class="task-value">会在终端运行 Python，能读懂字典、列表和函数。知道 JSON/CSV 是存放数据的文件即可；不用先读论文，不要求机器学习、密码学或 Agent 框架基础。</div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">第一次交付什么</div>
+                            <div class="task-value">一个可复现文件夹，包含修改后的 <code>memory_provenance_lab.py</code>、<code>memory_store.json</code>、<code>truth.json</code>、<code>results.csv</code>、<code>README.md</code>，以及 <code>record.md</code>。保留原始 11 条，至少新增 1 条；<code>record.md</code> 只需填写模板第 1–4 节：预测、新增记录实际结果、一条 80–150 字左右的边界解释、复现命令。不必抄写全部 CSV，不要求首次填完进阶指标表。</div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">谁来接应</div>
+                            <div class="task-value">李晓玉｜计算机工程与科学学院。负责解答运行问题、接收第一版并提供一次书面反馈。卡住也可直接来信，不用先做完。</div>
+                        </div>
+                        <div class="task-row">
+                            <div class="task-label">怎么联系</div>
+                            <div class="task-value contact-value"><a class="mail-link" href="mailto:lixiaoyu@shu.edu.cn">lixiaoyu@shu.edu.cn</a></div>
+                        </div>
+                    </div>
+                    <div class="panel" style="margin-top:14px;">
+                        <h4>邮件怎么写</h4>
+                        <p style="margin:0;color:var(--muted);font-size:0.86rem;">标题：“记忆归属实验 + 姓名 + 学校”。正文说明卡在哪一步、试过什么、希望获得什么帮助。</p>
+                    </div>
+                    <div class="resource-row">
+                        <a class="resource-btn solid" href="memory_starter.zip" download>下载实验包（memory_starter.zip）</a>
+                        <a class="resource-btn" href="mailto:lixiaoyu@shu.edu.cn">发邮件给接应人</a>
+                    </div>
+                </div>
+
+                <div class="block" style="margin-top:24px;">
+                    <h3 class="block-title">四步完成首次任务</h3>
+                    <div class="steps">
+                        <div class="step"><strong>运行</strong><span>解压，在解压目录运行 <code>python -X utf8 memory_provenance_lab.py --verify</code>。应有 11 条结果。</span></div>
+                        <div class="step"><strong>预测与修改</strong><span>按 README 示例，在 <code>build()</code> 的 A6 后、<code>store = {</code> 前新增记录，保留原始样本，ID 不重复。</span></div>
+                        <div class="step"><strong>复现</strong><span>运行 <code>python -X utf8 memory_provenance_lab.py --all</code>。此命令按脚本重新生成 JSON 和 CSV，会覆盖这些数据文件；正式改动应保留在 <code>build()</code> 中。</span></div>
+                        <div class="step"><strong>解释与提交</strong><span>对照结果，选 N3、A4、A6 或自己的记录解释边界，按模板打包提交。</span></div>
+                    </div>
+                    <p class="note"><strong>首次验收看四点：</strong>能复现；新增记录与真值 ID 对应；清楚区分“规则接受”和“评测正确”；能解释一个证据边界。遇到问题可带已完成部分来交流。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="advanced" aria-labelledby="advanced-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Optional · 有兴趣，再往下做</p>
+                    <h2 id="advanced-title">把样本扩到 14 条，再填五项指标</h2>
+                    <p>以下是<strong>可选进阶</strong>，完整练习预计约 3–5 小时，时间仅供安排，不是首次任务的门槛。</p>
+                </div>
+                <div class="panel">
+                    <p style="margin:0;color:var(--muted);font-size:0.88rem;">在原始 11 条上新增正常合并、合法更新、自选边界各 1 条，至少扩到 14 条。已有首次 X1 时，可以将它改为正常合并，再添加另外两条，也可以保留它继续新增。</p>
+                </div>
+                <div class="table-wrap" style="margin-top:14px;">
+                    <table aria-label="可选进阶的四类操作">
+                        <thead><tr><th scope="col">操作</th><th scope="col">观察什么</th><th scope="col">原始样本</th></tr></thead>
+                        <tbody>
+                            <tr><td>正常合并</td><td>完整混合证据能否被如实保留</td><td><code>N3</code></td></tr>
+                            <tr><td>合法更新</td><td>内容变化且重算锚点后是否仍可归属</td><td><code>N4</code></td></tr>
+                            <tr><td>片段移植</td><td>一句外来内容是否被多数规则吞掉</td><td><code>A1</code>、<code>A2</code>；<code>A3</code>/<code>A5</code> 另展示旧锚点或伪造锚点</td></tr>
+                            <tr><td>截断与丢锚点</td><td>缺失内容与缺失来源证据有何不同</td><td><code>A4</code>、<code>A6</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="note">原始与新增合计，每类至少两条；正常演化不需要标为攻击。<code>A4</code> 是 <code>missing</code>，<code>A6</code> 是 <code>attack</code>，不能把操作现象与样本类别混为一谈。进阶再填写五项汇总指标、一次边界复核和 150–200 字复盘；指标定义在 README，分母必须写清。</p>
+                <p class="note">还可以把多数阈值提高到 70%：基线 <code>A1</code>/<code>A2</code> 的占比为 80%，<code>A3</code>/<code>A5</code> 为 75%，仍会错归；正常 <code>N3</code> 则从错误接受变为 <code>partial</code>。单纯提高阈值会改变接受与拒绝的取舍，也无法补足截断时缺失的完整性证据。请另存实验副本并报告参数，避免覆盖基线。</p>
+            </div>
+        </section>
+
+        <section class="section" id="boundary" aria-labelledby="boundary-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Boundary · 需要记住的边界</p>
+                    <h2 id="boundary-title">这只是一种教学模拟</h2>
+                </div>
+                <div class="boundary-card">
+                    <h3>六条边界</h3>
+                    <ul>
+                        <li>只用虚构句子和虚构密钥，不上传个人聊天、真实账单或账号信息。</li>
+                        <li>密钥和 8 位锚点仅用于课堂模拟。假设攻击者不能掌握可信来源密钥、重签外来内容或更改可信密钥配置；生成端的学生掌握密钥，不代表攻击者可以使用它。</li>
+                        <li>锚点能对上，不证明内容真实；对不上，也不能单凭这一点判断恶意。</li>
+                        <li>截断样本的 <code>expected_sentences</code> 要保留扰动前句数，不能改为剩余句数来“修正”覆盖。</li>
+                        <li>QA 可答只是三组固定关键词的覆盖代理，不是真实问答正确率；合法更新也可能不匹配旧关键词。</li>
+                        <li><code>unknown</code> 不等于攻击成功。结论只限于手中的教学数据和规则，不外推为真实系统漏洞。</li>
+                    </ul>
+                </div>
+                <p class="note">这是来源归属问题的教学模拟，不是 MemMark 复现，也不代表真实产品有同样漏洞。所有数据均为虚构，无需真实账单；任务不接真实模型或真实账单。</p>
+            </div>
+        </section>
+
+        <section class="section section-white" id="next" aria-labelledby="next-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">What's Next · 这个任务与你的下一步</p>
+                    <h2 id="next-title">真实记忆系统里，来源会更难说得清</h2>
+                    <p>真实 Agent 的记忆会经历写入、合并、更新和删除。研究关注：在不知道真值的前提下，系统能否说明哪些内容属于哪个来源，哪些地方证据不足。</p>
+                </div>
+                <div class="prose" style="max-width:820px;">
+                    <p>这次先用很小的数据和明确的规则练习“提出预测—观察结果—核对证据”。如果做完后想继续，可以来信一起讨论真实记忆系统中的来源归属和正常演化问题；不要求先完成论文复现。</p>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-main">
+                        <h3>接应人：李晓玉</h3>
+                        <p>计算机工程与科学学院。负责解答运行问题、接收第一版并提供一次书面反馈；卡住也可直接来信，不用先做完。</p>
+                        <div class="contact-line"><span>邮箱</span><a class="mail-link" href="mailto:lixiaoyu@shu.edu.cn">lixiaoyu@shu.edu.cn</a></div>
+                        <div class="contact-line"><span>邮件标题</span><span style="color:var(--muted);">记忆归属实验 + 姓名 + 学校</span></div>
+                        <div class="resource-row">
+                            <a class="resource-btn solid" href="memory_starter.zip" download>下载实验包</a>
+                            <a class="resource-btn" href="../../agentlab/">返回 AgentLab 实验列表</a>
+                        </div>
+                    </div>
+                    <div class="panel" style="align-self:start;">
+                        <h4>附录（折叠）</h4>
+                        <p style="margin:0;color:var(--muted);font-size:0.86rem;">原始 11 条的预期输出、五项指标的统计口径放在页面底部折叠区，需要核对时再展开。</p>
+                    </div>
+                </div>
+
+                <details class="appendix">
+                    <summary>附录 A · 原始 11 条的预期输出</summary>
+                    <div class="appendix-body">
+                        <div class="table-wrap">
+                            <table aria-label="原始 11 条的预期输出">
+                                <thead><tr><th scope="col">ID</th><th scope="col">严格模式</th><th scope="col">覆盖</th><th scope="col">多数模式</th><th scope="col">覆盖</th><th scope="col">QA</th></tr></thead>
+                                <tbody>
+                                    <tr><td><code>N1</code></td><td>attributed(U)</td><td>1.00</td><td>attributed(U)</td><td>1.00</td><td>3/3</td></tr>
+                                    <tr><td><code>N2</code></td><td>attributed(T)</td><td>1.00</td><td>attributed(T)</td><td>1.00</td><td>2/3</td></tr>
+                                    <tr><td><code>N3</code></td><td>attributed(T+U)</td><td>1.00</td><td>attributed(U)</td><td>1.00</td><td>2/3</td></tr>
+                                    <tr><td><code>N4</code></td><td>attributed(U)</td><td>1.00</td><td>attributed(U)</td><td>1.00</td><td>2/3</td></tr>
+                                    <tr><td><code>N5</code></td><td>attributed(U)</td><td>1.00</td><td>attributed(U)</td><td>1.00</td><td>1/3</td></tr>
+                                    <tr><td><code>A1</code></td><td>partial(T+U)</td><td>1.00</td><td>attributed(U)</td><td>1.00</td><td>3/3</td></tr>
+                                    <tr><td><code>A2</code></td><td>partial(U)</td><td>0.80</td><td>attributed(U)</td><td>0.80</td><td>3/3</td></tr>
+                                    <tr><td><code>A3</code></td><td>partial(U)</td><td>0.75</td><td>attributed(U)</td><td>0.75</td><td>3/3</td></tr>
+                                    <tr><td><code>A5</code></td><td>partial(U)</td><td>0.75</td><td>attributed(U)</td><td>0.75</td><td>3/3</td></tr>
+                                    <tr><td><code>A4</code></td><td>unknown(-)</td><td>0.00</td><td>unknown(-)</td><td>0.00</td><td>3/3</td></tr>
+                                    <tr><td><code>A6</code></td><td>attributed(U)</td><td>0.50</td><td>attributed(U)</td><td>0.50</td><td>1/3</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-wrap">
+                            <table aria-label="五项汇总指标">
+                                <thead><tr><th scope="col">指标</th><th scope="col">严格模式</th><th scope="col">多数模式</th></tr></thead>
+                                <tbody>
+                                    <tr><td>攻击样本错误接受率</td><td>0/5（0%）</td><td>4/5（80%）</td></tr>
+                                    <tr><td>正常样本错误归属率</td><td>0/5（0%）</td><td>1/5（20%）</td></tr>
+                                    <tr><td>正常样本过度拒绝率</td><td>0/5（0%）</td><td>0/5（0%）</td></tr>
+                                    <tr><td>未知比例</td><td>1/11（9%）</td><td>1/11（9%）</td></tr>
+                                    <tr><td>证据不足仍被接受</td><td>1/11（9%）</td><td>4/11（36%）</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="note" style="margin-top:0;">正常 5 条 QA 均值 2.00/3，攻击 5 条均值 2.60/3，证据缺失 1 条为 3.00/3。使用价值与来源可信程度需要分别评估。</p>
+                    </div>
+                </details>
+
+                <details class="appendix">
+                    <summary>附录 B · 五项指标的口径</summary>
+                    <div class="appendix-body">
+                        <p class="note" style="margin-top:0;">错误接受与正常错误归属都要求：判定为 <code>attributed</code>，且输出来源集合与真值来源集合不一致。前者分母为 <code>attack</code> 数，后者分母为 <code>normal</code> 数。</p>
+                        <p class="note" style="margin-top:0;">正常过度拒绝指 <code>normal</code> 被判为 <code>partial</code> 或 <code>unknown</code>，分母为 <code>normal</code> 数。未知比例、证据不足仍被接受的分母均为全部记录数；后者要求 <code>attributed</code> 且覆盖小于 1。</p>
+                        <p class="note" style="margin-top:0;">覆盖为命中句数除以 truth 中扰动前应有句数，不是验证器能独立知道的完整性结论。<code>A6</code> 不计错归，但计入证据不足仍被接受。</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+    </main>
+
+    <footer class="shell">
+        <div class="footer-inner">
+            <span>MemoryLab · 记忆来源归属实验 · 全部数据均为虚构</span>
+            <span>版式参考 AgentLab · 内容：李晓玉 · 用于教学与实验设计讨论</span>
+        </div>
+    </footer>
+
+    <script>
+        // 六次来源判断：先选，再看答案与解析，可重新选择
+        document.querySelectorAll("[data-judge]").forEach(function (card) {
+            const buttons = Array.from(card.querySelectorAll(".judge-btn"));
+            const feedback = card.querySelector(".judge-feedback");
+            buttons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    const choice = button.dataset.choice;
+                    const answer = feedback.dataset.answer;
+                    buttons.forEach(function (item) { item.removeAttribute("aria-pressed"); });
+                    button.setAttribute("aria-pressed", "true");
+                    const isRight = choice === answer;
+                    feedback.className = "judge-feedback show " + (isRight ? "ok" : (choice === "说不清" ? "unsure" : "no"));
+                    feedback.innerHTML = "";
+                    const head = document.createElement("strong");
+                    head.textContent = (isRight ? "判断与严格标准一致" : "与严格标准不一致") + " · 正确答案：" + answer;
+                    const line = document.createElement("span");
+                    line.className = "choice-line";
+                    line.textContent = "你选择了：" + choice;
+                    const body = document.createElement("span");
+                    body.textContent = feedback.dataset.explain;
+                    feedback.appendChild(head);
+                    feedback.appendChild(line);
+                    feedback.appendChild(body);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
