@@ -259,6 +259,26 @@
         .challenge-card:nth-child(3) .tag { color: #a75424; background: #fff0df; }
         .challenge-card ul { margin: 13px 0 0; padding-left: 1.1rem; color: var(--muted); font-size: 0.87rem; }
 
+        /* 第二排：四个新实验，四列一排放得下 */
+        .challenge-grid-row2 { margin-top: 15px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .challenge-grid-row2 .challenge-card { min-height: 235px; padding: 18px; }
+        .challenge-grid-row2 .challenge-card .tag { margin-bottom: 10px; font-size: 0.7rem; }
+        .challenge-grid-row2 .challenge-card h3 { margin-bottom: 6px; font-size: 1rem; line-height: 1.3; }
+        .challenge-grid-row2 .challenge-card p {
+            display: -webkit-box;
+            overflow: hidden;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size: 0.87rem;
+            line-height: 1.5;
+        }
+        .challenge-grid-row2 .challenge-card ul { margin-top: 7px; font-size: 0.8rem; line-height: 1.42; }
+        .challenge-grid-row2 .challenge-card .lab-cta { padding-top: 9px; font-size: 0.82rem; }
+        .challenge-grid-row2 .challenge-card:nth-child(4) .tag { color: #4a6b9a; background: #e4eefb; }
+        .challenge-grid-row2 .challenge-card.lab-placeholder { border-style: dashed; background: rgba(255, 255, 255, 0.55); box-shadow: none; }
+        .challenge-grid-row2 .challenge-card.lab-placeholder .tag { color: var(--muted); background: #eef2f0; }
+        .challenge-grid-row2 .challenge-card.lab-placeholder .lab-cta { color: var(--muted); }
+
         .track-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         .track-card { min-height: 160px; padding: 21px; }
         .track-card .track-type { display: block; margin-bottom: 9px; color: var(--green); font-size: 0.74rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -295,6 +315,10 @@
         footer { padding: 27px 0 37px; color: var(--muted); font-size: 0.85rem; }
         .footer-inner { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); padding-top: 21px; }
 
+        @media (max-width: 1180px) {
+            .challenge-grid-row2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
         @media (max-width: 900px) {
             .hero { grid-template-columns: 1fr 0.85fr; gap: 25px; }
             .path-cards, .track-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -314,7 +338,7 @@
             .visual-card { min-height: 350px; padding: 22px; }
             .loop-step { min-height: 100px; padding: 14px; }
             .section { padding: 55px 0; }
-            .path-cards, .direction-grid, .challenge-grid, .track-grid, .resource-grid, .faq-grid, .steps { grid-template-columns: 1fr; }
+            .path-cards, .direction-grid, .challenge-grid, .challenge-grid-row2, .track-grid, .resource-grid, .faq-grid, .steps { grid-template-columns: 1fr; }
             .path-card, .direction-card, .challenge-card, .track-card, .step { min-height: auto; }
             .path-finder { padding: 18px; }
             .finder-form { grid-template-columns: 1fr; }
@@ -576,6 +600,54 @@
                         </ul>
                         <span class="lab-cta">进入实验 →</span>
                     </a>
+                </div>
+
+                <div class="challenge-grid challenge-grid-row2">
+                    <a class="challenge-card lab-card" href="../labs/AgentTracePoisonLab/index.html">
+                        <span class="tag">安全 · 可参与</span>
+                        <h3>Agent 轨迹投毒侦探</h3>
+                        <p>用 8 条模拟轨迹查示范：Agent 的训练数据里，有没有不该出现的工具调用。</p>
+                        <ul>
+                            <li>约 2-3 小时</li>
+                            <li>需要基础 Python</li>
+                            <li>模拟数据，不连接真实模型</li>
+                        </ul>
+                        <span class="lab-cta">进入实验 →</span>
+                    </a>
+
+                    <a class="challenge-card lab-card" href="../labs/MemoryLab/index.html">
+                        <span class="tag">安全 · 可参与</span>
+                        <h3>这段记忆，到底是谁的？</h3>
+                        <p>先做六次来源判断，再给记账助手加一条记忆，看两种规则会不会把它归错。</p>
+                        <ul>
+                            <li>约 1-2 小时</li>
+                            <li>需要基础 Python</li>
+                            <li>不用模型和 API</li>
+                        </ul>
+                        <span class="lab-cta">进入实验 →</span>
+                    </a>
+
+                    <article class="challenge-card lab-card lab-placeholder">
+                        <span class="tag">规划中</span>
+                        <h3>新实验 · 位置待补</h3>
+                        <p>已经预留这一格，等下一份实验材料定稿后直接替换卡片内容。</p>
+                        <ul>
+                            <li>内容整理中</li>
+                            <li>时间与要求待定</li>
+                        </ul>
+                        <span class="lab-cta">即将开放</span>
+                    </article>
+
+                    <article class="challenge-card lab-card lab-placeholder">
+                        <span class="tag">规划中</span>
+                        <h3>新实验 · 位置待补</h3>
+                        <p>同样先占位，避免以后加实验时又动整块排版。</p>
+                        <ul>
+                            <li>内容整理中</li>
+                            <li>时间与要求待定</li>
+                        </ul>
+                        <span class="lab-cta">即将开放</span>
+                    </article>
                 </div>
             </div>
         </section>
