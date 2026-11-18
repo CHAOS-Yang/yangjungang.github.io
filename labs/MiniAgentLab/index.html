@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="从零构建智能体：从一次本地模型调用开始，接入云端模型，加上自己写的工具、多轮对话、历史保存与上下文压缩，最后做成一个 Gradio 网页助手。">
+    <meta name="theme-color" content="#f4f7f4">
+    <title>从零搭一个会调工具的网页助手 | AgentLab 本科实验</title>
+<style>
+        :root {
+            color-scheme: light;
+            --ink: #183638;
+            --muted: #5d7270;
+            --paper: #f4f7f4;
+            --card: #ffffff;
+            --line: #dce7e1;
+            --green: #087e68;
+            --green-dark: #075e52;
+            --mint: #d9f4e7;
+            --orange: #ff895f;
+            --lavender: #e9e8ff;
+            --shadow: 0 20px 60px rgba(25, 59, 52, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        [id] { scroll-margin-top: 18px; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 88% 2%, rgba(233, 232, 255, 0.85), transparent 24rem),
+                var(--paper);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.7;
+            letter-spacing: 0;
+        }
+
+        a { color: inherit; }
+        a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+            outline: 3px solid var(--orange);
+            outline-offset: 3px;
+        }
+
+        .shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+
+        .topbar {
+            display: flex;
+            min-height: 80px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            border-bottom: 1px solid rgba(24, 54, 56, 0.1);
+        }
+        .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand-mark {
+            display: grid;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            border-radius: 13px 13px 13px 4px;
+            color: white;
+            background: var(--green);
+            font-size: 0.8rem;
+            font-weight: 900;
+        }
+        .brand-name { display: block; font-size: 1.02rem; font-weight: 850; }
+        .brand-sub { display: block; margin-top: -3px; color: var(--muted); font-size: 0.7rem; font-weight: 600; }
+        .nav { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+        .nav a { color: var(--muted); font-size: 0.86rem; font-weight: 650; text-decoration: none; }
+        .nav a:hover { color: var(--green); }
+        .nav .home-link { padding: 9px 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.02fr 0.98fr;
+            align-items: stretch;
+            gap: 42px;
+            padding: 54px 0 34px;
+        }
+        .hero > div:first-child { display: flex; flex-direction: column; justify-content: center; }
+        .kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            align-self: flex-start;
+            padding: 7px 12px;
+            border: 1px solid #cfe5da;
+            border-radius: 999px;
+            color: var(--green-dark);
+            background: rgba(255, 255, 255, 0.72);
+            font-size: 0.8rem;
+            font-weight: 750;
+        }
+        .kicker-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(255, 137, 95, 0.16); }
+        h1 { margin: 21px 0 16px; max-width: 640px; font-size: 2.85rem; line-height: 1.2; }
+        h1 .accent { color: var(--green); }
+        .hero-copy { max-width: 600px; color: var(--muted); font-size: 1.02rem; }
+        .hero-copy strong { color: var(--ink); }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 24px; }
+        .button {
+            display: inline-flex;
+            min-height: 47px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 18px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font: inherit;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease;
+        }
+        .button:hover { transform: translateY(-2px); }
+        .button-primary { color: white; background: var(--green); box-shadow: 0 10px 22px rgba(8, 126, 104, 0.2); }
+        .button-primary:hover { background: var(--green-dark); }
+        .button-secondary { border-color: var(--line); color: var(--ink); background: rgba(255,255,255,0.78); }
+        .hero-notes { display: flex; flex-wrap: wrap; gap: 8px 17px; margin-top: 20px; color: var(--muted); font-size: 0.85rem; }
+        .hero-notes span::before { content: "✓"; margin-right: 6px; color: var(--green); font-weight: 900; }
+
+        .example-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 21px;
+            border: 1px solid rgba(255,255,255,0.86);
+            border-radius: 26px;
+            background: linear-gradient(155deg, #eef0ff 0%, #e4f5ec 60%, #e7f8ee 100%);
+            box-shadow: var(--shadow);
+        }
+        .example-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .example-title { color: var(--green-dark); font-size: 0.74rem; font-weight: 900; }
+        .example-badge { padding: 3px 8px; border-radius: 999px; color: #5652a0; background: rgba(233,232,255,0.9); font-size: 0.66rem; font-weight: 850; }
+        .example-body {
+            margin-top: 11px;
+            padding: 13px 14px;
+            border-radius: 11px;
+            color: #e8f2ee;
+            background: var(--ink);
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.73rem;
+            line-height: 1.75;
+            white-space: pre-wrap;
+        }
+        .example-verdict { display: inline-flex; align-self: flex-start; margin-top: 10px; padding: 5px 10px; border-radius: 999px; color: var(--green-dark); background: rgba(217,244,231,0.95); font-size: 0.72rem; font-weight: 850; }
+
+        .toc-strip { padding: 0 0 40px; }
+        .toc { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 18px; border-top: 1px solid rgba(24, 54, 56, 0.08); }
+        .toc-label { align-self: center; margin-right: 4px; color: var(--muted); font-size: 0.76rem; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; }
+        .toc a {
+            padding: 8px 13px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 0.82rem;
+            font-weight: 750;
+            text-decoration: none;
+        }
+        .toc a:hover { border-color: #b9d8c9; color: var(--green); }
+
+        .section { padding: 60px 0; }
+        .section-white { border-top: 1px solid rgba(24,54,56,0.06); border-bottom: 1px solid rgba(24,54,56,0.06); background: rgba(255,255,255,0.7); }
+        .section-heading { max-width: 980px; margin-bottom: 24px; }
+        .section-kicker { margin: 0 0 7px; color: var(--green); font-size: 0.74rem; font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; }
+        h2 { margin: 0; font-size: 2.1rem; line-height: 1.26; }
+        h3 { font-size: 1.1rem; line-height: 1.4; }
+        .section-heading p { margin: 10px 0 0; color: var(--muted); }
+        code { font-family: "Cascadia Code", Consolas, "Courier New", monospace; font-size: 0.88em; }
+        .prose { color: var(--muted); font-size: 0.94rem; }
+        .prose p { margin: 0 0 12px; }
+        .prose strong { color: var(--ink); }
+        .block { margin-top: 22px; }
+        .block:first-child { margin-top: 0; }
+        .block-title { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; font-size: 1.06rem; }
+        .block-title .idx { color: var(--green); font-family: "Cascadia Code", Consolas, monospace; font-size: 0.82rem; font-weight: 900; }
+
+        .quiz-stack { display: grid; gap: 13px; margin-top: 14px; }
+        .quiz-card { padding: 19px 20px; border: 1px solid var(--line); border-radius: 16px; background: white; box-shadow: 0 10px 30px rgba(25,59,52,0.05); }
+        .quiz-num { margin: 0 0 4px; color: var(--green); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+        .quiz-q { margin: 0; font-size: 0.95rem; }
+        .judge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+        .judge-btn {
+            min-width: 92px;
+            min-height: 40px;
+            padding: 0 16px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--ink);
+            background: #fbfdfc;
+            font: inherit;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: border-color 0.16s ease, background 0.16s ease;
+        }
+        .judge-btn:hover { border-color: #b9d8c9; background: #f4fbf7; }
+        .judge-btn[aria-pressed="true"] { border-color: var(--green); background: #eefaf4; box-shadow: 0 0 0 1px var(--green) inset; }
+        .judge-feedback { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 0.86rem; }
+        .judge-feedback.show { display: block; }
+        .judge-feedback.ok { border: 1px solid #bfe3d1; background: #effaf4; }
+        .judge-feedback.no { border: 1px solid #f3cdbf; background: #fff5f0; }
+        .judge-feedback.unsure { border: 1px solid #ddd7f5; background: #f5f3ff; }
+        .judge-feedback strong { display: block; margin-bottom: 3px; }
+        .judge-feedback.ok strong { color: var(--green-dark); }
+        .judge-feedback.no strong { color: #a14428; }
+        .judge-feedback.unsure strong { color: #5652a0; }
+        .judge-feedback .choice-line { display: block; margin-bottom: 5px; color: var(--muted); font-size: 0.79rem; }
+
+        .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: white; }
+        table { width: 100%; min-width: 540px; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eaf1ed; vertical-align: top; }
+        th { color: var(--green-dark); background: #f7faf8; font-size: 0.73rem; font-weight: 850; }
+        tbody tr:last-child td { border-bottom: 0; }
+        td code { font-size: 0.82em; }
+
+        .panel { padding: 16px 17px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+        .panel h4 { margin: 0 0 8px; font-size: 0.92rem; }
+        .panel ul, .panel ol { margin: 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.86rem; }
+        .panel li + li { margin-top: 5px; }
+        .panel strong { color: var(--ink); }
+        .note { margin-top: 14px; padding: 13px 15px; border: 1px dashed #c9ded3; border-radius: 11px; color: var(--muted); background: #fbfdfc; font-size: 0.86rem; }
+        .note strong { color: var(--green-dark); }
+        .split-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-top: 14px; }
+        .split-grid .panel h4 { color: var(--green-dark); }
+        .split-grid .panel.muted h4 { color: #5652a0; }
+
+        .code-card { overflow: hidden; border: 1px solid #14383b; border-radius: 13px; background: #0f2c2f; }
+        .code-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 13px; background: #153a3d; }
+        .code-name { color: #a9d3c4; font-family: "Cascadia Code", Consolas, monospace; font-size: 0.74rem; }
+        .code-btn {
+            padding: 5px 10px;
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 7px;
+            color: #dcece5;
+            background: rgba(255,255,255,0.08);
+            font: inherit;
+            font-size: 0.74rem;
+            font-weight: 750;
+            cursor: pointer;
+        }
+        .code-btn:hover { background: rgba(255,255,255,0.18); }
+        pre.code {
+            margin: 0;
+            padding: 14px 16px;
+            overflow-x: auto;
+            color: #e8f2ee;
+            font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            tab-size: 4;
+        }
+        .out-card { overflow: hidden; border: 1px solid #14383b; border-radius: 13px; background: #0b2427; }
+        pre.out-block {
+            margin: 0;
+            padding: 13px 16px;
+            overflow-x: auto;
+            color: #d7e8e2;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.76rem;
+            line-height: 1.75;
+        }
+
+        .task-card { padding: 23px; border: 1px solid #cfe5da; border-radius: 19px; background: linear-gradient(145deg, #ffffff 0%, #f2fbf6 100%); box-shadow: var(--shadow); }
+        .task-top { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .task-badge { padding: 5px 10px; border-radius: 999px; color: var(--green-dark); background: var(--mint); font-size: 0.73rem; font-weight: 850; }
+        .task-badge.orange { color: #a75424; background: #fff0df; }
+        .task-badge.lav { color: #5652a0; background: var(--lavender); }
+        .task-grid { display: grid; gap: 1px; overflow: hidden; border: 1px solid #e1eee7; border-radius: 12px; background: #e1eee7; }
+        .task-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); background: white; }
+        .task-label { padding: 13px 15px; color: var(--green-dark); background: #f3faf6; font-size: 0.82rem; font-weight: 850; }
+        .task-value { padding: 13px 15px; font-size: 0.87rem; }
+        .contact-value { color: var(--green-dark); font-weight: 800; }
+        .mail-link { color: var(--green-dark); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+        .resource-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .resource-btn { display: inline-flex; min-height: 38px; align-items: center; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--green-dark); background: white; font-size: 0.81rem; font-weight: 750; text-decoration: none; }
+        .resource-btn:hover { border-color: #b9d8c9; background: #f7fbf9; }
+        .resource-btn.solid { border-color: var(--green); color: white; background: var(--green); }
+        .resource-btn.solid:hover { background: var(--green-dark); }
+
+        .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 15px; counter-reset: step; }
+        .step { padding: 14px 12px 13px 39px; position: relative; border: 1px solid var(--line); border-radius: 11px; background: white; counter-increment: step; }
+        .step::before { content: counter(step); position: absolute; left: 12px; top: 14px; display: grid; width: 19px; height: 19px; place-items: center; border-radius: 50%; color: white; background: var(--green); font-size: 0.64rem; font-weight: 900; }
+        .step strong { display: block; font-size: 0.83rem; }
+        .step span { display: block; margin-top: 3px; color: var(--muted); font-size: 0.76rem; }
+
+        .result-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+        .result-card { padding: 16px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+        .result-card h4 { margin: 0 0 6px; font-size: 0.9rem; }
+        .result-card p { margin: 0 0 10px; color: var(--muted); font-size: 0.82rem; }
+        .result-card .out-block { border: 1px solid #14383b; border-radius: 9px; font-size: 0.72rem; }
+
+        .boundary-card { padding: 20px 22px; border: 1px solid #f3d3c7; border-radius: 16px; background: #fff8f5; }
+        .boundary-card h3 { margin: 0 0 8px; color: #a14428; font-size: 1rem; }
+        .boundary-card ul { margin: 0; padding-left: 1.1rem; color: #7b4a38; font-size: 0.86rem; }
+        .boundary-card li + li { margin-top: 6px; }
+        .boundary-card strong { color: #a14428; }
+
+        .contact-card { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 18px; margin-top: 16px; }
+        .contact-main { padding: 22px; border: 1px solid #cfe5da; border-radius: 16px; background: linear-gradient(145deg, #ffffff 0%, #f2fbf6 100%); }
+        .contact-main h3 { margin: 0 0 8px; font-size: 1.04rem; }
+        .contact-main p { margin: 0 0 10px; color: var(--muted); font-size: 0.88rem; }
+        .contact-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; padding: 10px 12px; border: 1px solid #e1eee7; border-radius: 10px; background: white; font-size: 0.88rem; }
+        .contact-line + .contact-line { margin-top: 8px; }
+        .contact-line span:first-child { color: var(--muted); font-size: 0.78rem; font-weight: 800; }
+
+        details.appendix { margin-top: 13px; border: 1px solid var(--line); border-radius: 13px; background: white; overflow: hidden; }
+        details.appendix > summary { padding: 14px 16px; color: var(--green-dark); font-size: 0.9rem; font-weight: 850; cursor: pointer; }
+        .appendix-body { padding: 0 16px 16px; }
+        .appendix-body > * + * { margin-top: 12px; }
+
+        footer { padding: 26px 0 36px; color: var(--muted); font-size: 0.83rem; }
+        .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; padding-top: 20px; border-top: 1px solid var(--line); }
+
+        @media (max-width: 920px) {
+            .hero { grid-template-columns: 1fr; gap: 28px; padding: 46px 0 30px; }
+            h1 { font-size: 2.4rem; }
+            h2 { font-size: 1.85rem; }
+            .split-grid, .result-grid, .contact-card { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .nav a:not(.home-link) { display: none; }
+        }
+
+        @media (max-width: 680px) {
+            .shell { width: min(100% - 28px, 560px); }
+            .topbar { min-height: 70px; }
+            h1 { font-size: 1.95rem; }
+            h2 { font-size: 1.55rem; }
+            .section { padding: 44px 0; }
+            .steps { grid-template-columns: 1fr; }
+            .task-row { grid-template-columns: 1fr; }
+            .task-label { padding-bottom: 4px; }
+            .task-value { padding-top: 4px; }
+            .judge-btn { flex: 1 1 30%; min-width: 0; }
+            pre.code, pre.out-block { font-size: 0.73rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+        }
+    </style>
+<style>
+        /* 本页新增：阶段卡片、清单、三栏与提示样式 */
+        .stage-list { display: grid; gap: 14px; margin-top: 18px; }
+        .stage-card {
+            display: grid;
+            grid-template-columns: 84px minmax(0, 1fr);
+            gap: 18px;
+            padding: 18px 20px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(25, 59, 52, 0.05);
+        }
+        .stage-no {
+            display: grid;
+            gap: 2px;
+            align-content: center;
+            justify-items: center;
+            align-self: start;
+            height: 62px;
+            border-radius: 14px;
+            color: var(--green-dark);
+            background: var(--mint);
+        }
+        .stage-no span { font-size: 0.66rem; font-weight: 850; letter-spacing: 0.08em; }
+        .stage-no strong { font-size: 1.28rem; font-weight: 900; line-height: 1; }
+        .stage-body h3 { margin: 0 0 4px; font-size: 1.04rem; }
+        .stage-body p { margin: 0 0 8px; color: var(--muted); font-size: 0.88rem; }
+        .stage-body p strong { color: var(--ink); }
+        .stage-body ul { margin: 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.86rem; }
+        .stage-body li + li { margin-top: 4px; }
+        .file-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0 0 9px;
+            padding: 3px 9px;
+            border: 1px solid #d7e7df;
+            border-radius: 7px;
+            color: var(--green-dark);
+            background: #f5fbf8;
+            font-family: "Cascadia Code", Consolas, monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .file-link:hover { border-color: #b9d8c9; background: #eefaf3; }
+        .stage-deliver {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border: 1px dashed #c9ded3;
+            border-radius: 10px;
+            color: var(--muted);
+            background: #fbfdfc;
+            font-size: 0.83rem;
+        }
+        .stage-deliver strong { color: var(--green-dark); }
+
+        .mini-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+        .mini-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+        .check-list { display: grid; gap: 8px; margin-top: 13px; }
+        .check-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 11px 13px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: white;
+            font-size: 0.88rem;
+        }
+        .check-item input { flex: 0 0 auto; width: 16px; height: 16px; margin: 4px 0 0; accent-color: var(--green); cursor: pointer; }
+        .check-item span { color: var(--muted); }
+        .check-item strong { color: var(--ink); }
+        .progress-wrap { display: flex; align-items: center; gap: 11px; margin-top: 12px; color: var(--muted); font-size: 0.79rem; font-weight: 800; }
+        .progress-bar { flex: 1; height: 7px; border-radius: 999px; background: #e6efea; overflow: hidden; }
+        .progress-fill { width: 0; height: 100%; border-radius: 999px; background: var(--green); transition: width 0.2s ease; }
+
+        .note.warn { border-color: #f3cdbf; color: #7b4a38; background: #fff8f5; }
+        .note.warn strong { color: #a14428; }
+        .quote-box {
+            margin-top: 12px;
+            padding: 14px 16px;
+            border-left: 3px solid var(--green);
+            border-radius: 0 11px 11px 0;
+            color: var(--muted);
+            background: #f4fbf7;
+            font-size: 0.87rem;
+        }
+        .repo-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+        @media (max-width: 920px) {
+            .mini-grid, .mini-grid.two { grid-template-columns: 1fr; }
+            .stage-card { grid-template-columns: 72px minmax(0, 1fr); gap: 14px; }
+        }
+        @media (max-width: 680px) {
+            .stage-card { grid-template-columns: 1fr; gap: 12px; }
+            .stage-no { justify-items: start; height: auto; padding: 7px 13px; }
+            .stage-no span, .stage-no strong { display: inline; }
+        }
+    </style>
+</head>
+<body>
+    <header class="shell topbar">
+        <a class="brand" href="#top" aria-label="从零构建智能体任务首页">
+            <span class="brand-mark">智能</span>
+            <span><span class="brand-name">MiniAgentLab</span><span class="brand-sub">从零构建智能体</span></span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+            <a href="#about">任务概况</a>
+            <a href="#start">起步三练</a>
+            <a href="#stages">阶段 1—4</a>
+            <a href="#delivery">第一次交付</a>
+            <a href="#optional">可选阶段</a>
+            <a href="#contact">接应与联系</a>
+            <a class="home-link" href="../../agentlab/">返回 AgentLab ↗</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="shell hero" aria-labelledby="hero-title">
+            <div>
+                <span class="kicker"><span class="kicker-dot"></span>入门任务 · Python + 大模型 · 可分阶段做</span>
+                <h1 id="hero-title">从一次本地调用开始，<span class="accent">搭出会调工具的网页助手</span></h1>
+                <p class="hero-copy">
+                    普通模型只会回答问题；接上工具之后，模型可以提出一次调用请求，由你的 Python 程序执行函数，再把结果交回模型继续回答。<strong>这条最小流程，就是智能体的骨架。</strong>任务从跑通本地模型开始，逐步加入多轮对话、工具、存盘历史和上下文压缩，最后搬进浏览器页面。
+                </p>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#start">从起步练习开始 <span aria-hidden="true">→</span></a>
+                    <a class="button button-secondary" href="https://github.com/HXIAO6/miniAgent" target="_blank" rel="noreferrer">打开参考仓库 ↗</a>
+                </div>
+                <div class="hero-notes">
+                    <span>建议 1—2 周分阶段完成</span>
+                    <span>只需 Python + Gradio</span>
+                    <span>云端模型由参与者自行部署</span>
+                    <span>不含真实密钥</span>
+                </div>
+            </div>
+
+            <aside class="example-card" aria-label="一次工具调用的最小流程">
+                <div class="example-head">
+                    <span class="example-title">最小流程 · 一次工具调用</span>
+                    <span class="example-badge">示例说明</span>
+                </div>
+                <div class="example-body">问题：现在几点了？
+→ 模型提出工具调用 get_current_time()
+→ Python 执行函数，返回 2026-11-18 20:15
+→ 模型把结果写成一句回答
+
+判定：能看到工具内的调试输出，
+才算工具真的执行过，而不只是回答里有时间。</div>
+                <span class="example-verdict">工具调用是程序执行，不是模型凭空编出来的数字</span>
+            </aside>
+        </section>
+
+        <div class="shell toc-strip">
+            <nav class="toc" aria-label="页面目录">
+                <a href="#about">任务概况与准备</a>
+                <a href="#start">起步三练</a>
+                <a href="#stages">阶段 1—4</a>
+                <a href="#delivery">第一次交付</a>
+                <a href="#optional">可选阶段 5—7</a>
+                <a href="#contact">接应与联系</a>
+                <a href="#next">进阶方向</a>
+            </nav>
+        </div>
+
+        <section class="section section-white" id="about" aria-labelledby="about-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">About · 任务概况</p>
+                    <h2 id="about-title">先看清这条路有多长，再决定从哪一段开始</h2>
+                    <p>第一次交付的终点是阶段 4：一个能在浏览器里使用、带工具和记忆的网页助手。阶段 5—7 属于后续任务，可以之后再和接应人约定。</p>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-top">
+                        <span class="task-badge">入门任务</span>
+                        <span class="task-badge lav">Python 实践</span>
+                        <span class="task-badge orange">可分阶段接着做</span>
+                    </div>
+                    <div class="task-grid">
+                        <div class="task-row"><div class="task-label">适合谁</div><div class="task-value">会基础 Python、对大模型应用或智能体感兴趣的本科生</div></div>
+                        <div class="task-row"><div class="task-label">第一个小任务</div><div class="task-value">从 <code>local.py</code> 起步，完成模型调用与工具修改，再完成阶段 1—4，构建带工具、多轮对话、历史保存和上下文压缩的 Gradio 网页助手</div></div>
+                        <div class="task-row"><div class="task-label">预计投入</div><div class="task-value">建议按 1—2 周安排、分阶段完成；具体进度结合 Python 基础与部署情况商定。这是任务安排建议，不是实测耗时</div></div>
+                        <div class="task-row"><div class="task-label">第一次交付</div><div class="task-value">可运行的网页助手、阶段实验记录、简短演示和部署说明</div></div>
+                        <div class="task-row"><div class="task-label">后续可以做什么</div><div class="task-value">阶段 5—7：文档知识库 → 检索改进 → SQLite 存储与文档管理</div></div>
+                        <div class="task-row"><div class="task-label">参考项目</div><div class="task-value"><a class="mail-link" href="https://github.com/HXIAO6/miniAgent" target="_blank" rel="noreferrer">HXIAO6/miniAgent</a>　（保留逐步构建的示例代码：<code>local.py</code>、<code>ds.py</code> 到 <code>ds6.py</code>，以及当前的知识库版本）</div></div>
+                        <div class="task-row"><div class="task-label">谁来接应</div><div class="task-value">韩霄</div></div>
+                        <div class="task-row"><div class="task-label">怎么联系</div><div class="task-value contact-value"><a class="mail-link" href="mailto:hx2506642408@163.com">hx2506642408@163.com</a></div></div>
+                    </div>
+                    <div class="resource-row">
+                        <a class="resource-btn solid" href="https://github.com/HXIAO6/miniAgent" target="_blank" rel="noreferrer">打开参考仓库</a>
+                        <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent#学习路线" target="_blank" rel="noreferrer">README 学习路线</a>
+                        <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent#部署要求" target="_blank" rel="noreferrer">部署要求与快速开始</a>
+                        <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent/blob/main/requirements-rag.txt" target="_blank" rel="noreferrer">requirements-rag.txt</a>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.1</span>这个任务想让你学会什么</h3>
+                    <div class="prose">
+                        <p>普通模型调用接收问题并生成回答。加入工具后，模型可以提出调用请求，由 Python 程序执行函数，再把执行结果交回模型，继续完成回答。本任务从这条最小流程入手，理解一个智能体如何连接模型、工具和对话状态。</p>
+                        <p>参考项目保留了逐步构建的代码：<code>local.py</code> 尝试本地模型，<code>ds.py</code> 到 <code>ds6.py</code> 逐步接入云端模型、扩展工具和交互方式，当前版本再加入知识库与 SQLite 存储。<strong>可以先阅读示例，再自己修改和补充，不要求首次参加就从空文件重写全部功能。</strong></p>
+                        <p>完成第一个小任务后，你应能解释模型与 Python 工具如何配合、多轮历史如何组织、重启后如何恢复记录，以及上下文压缩与网页交互如何实现，最终交付一个可以在浏览器中使用的助手。</p>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.2</span>需要什么基础</h3>
+                    <div class="mini-grid">
+                        <div class="panel">
+                            <h4>开始前需要会的</h4>
+                            <ul>
+                                <li>能读写简单的 Python 函数，理解参数、返回值、列表和字典</li>
+                                <li>会在终端运行 Python 文件，能安装依赖并阅读基本报错</li>
+                                <li>知道文件和目录的区别，能用编辑器修改代码</li>
+                            </ul>
+                        </div>
+                        <div class="panel">
+                            <h4>可以边做边学的</h4>
+                            <ul>
+                                <li>API 地址、密钥、环境变量和 <code>.env</code> 文件</li>
+                                <li><code>async</code>、<code>await</code> 和流式输出的基本用法</li>
+                                <li>Agent、工具调用、上下文、Embedding 和 RAG 的含义</li>
+                            </ul>
+                        </div>
+                        <div class="panel">
+                            <h4>第一次不用先会的</h4>
+                            <ul>
+                                <li>不要求训练模型，也不要求深度学习推导</li>
+                                <li>不要求先掌握向量数据库，阶段 5 才用到</li>
+                                <li>不需要独立前端开发，网页用 Gradio 搭建</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">2.3</span>先准备哪些东西</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>阶段</th><th>需要准备</th></tr></thead>
+                            <tbody>
+                                <tr><td>首次本地调用</td><td>Python 3.11、编辑器、Ollama，以及示例使用的 <code>qwen3.5:4b</code></td></tr>
+                                <tr><td>云端模型与工具调用</td><td>OpenAI Agents SDK、python-dotenv、支持流式输出和工具调用的 OpenAI 兼容服务、可用密钥</td></tr>
+                                <tr><td>联网搜索与网页</td><td>Tavily 及其密钥、Gradio；按进度准备</td></tr>
+                                <tr><td>文档知识库（可选）</td><td>Ollama BGE-M3、ChromaDB、文档解析依赖、本地 ONNX 重排模型；首次任务不需要下载</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="note">
+                        <strong>几个省事的做法：</strong>建议先读 README 的学习路线和运行方法，再按「部署要求」配置环境；只学早期示例时可按需安装依赖，不必一上来装齐 RAG 那一套。Windows 用户可参考 README 用 Python 3.11 和项目内虚拟环境；代码、模型和实验资料优先放在自己的数据盘，Ollama 模型位置由 Ollama 单独管理。已经有可用环境或模型时先检查，避免重复安装。
+                    </div>
+                    <div class="note warn">
+                        <strong>云端模型由参与者自行部署：</strong>接口需支持 OpenAI 兼容的 Chat Completions、流式输出和工具调用，服务地址、密钥与模型名称自己配置。本地模型暂时跑不起来时，可以和接应人协商先做云端部分，<strong>在交付中说明原因，不把未运行的部分写成已完成</strong>。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="start" aria-labelledby="start-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Start · 起步练习</p>
+                    <h2 id="start-title">先跑通模型，再改一个自己的工具</h2>
+                    <p>这三步对应 <code>local.py</code> 到 <code>ds.py</code> 的过程，是进入阶段 1—4 之前的检查点：先看见模型怎么被调用，再看见工具怎么被真正执行。</p>
+                </div>
+
+                <div class="stage-list">
+                    <div class="stage-card">
+                        <div class="stage-no"><span>步骤</span><strong>1</strong></div>
+                        <div class="stage-body">
+                            <h3>观察一次本地模型调用</h3>
+                            <a class="file-link" href="https://github.com/HXIAO6/miniAgent/blob/main/src/local.py" target="_blank" rel="noreferrer">src/local.py ↗</a>
+                            <p>它用 Ollama 的本地模型回答一个固定问题。</p>
+                            <ul>
+                                <li>按 README 的包装命令运行示例，确认使用的是 Chat Completions 接口</li>
+                                <li>把固定问题改成自己的问题，保留修改前后的输出</li>
+                                <li>找出代码里定义模型、设置指令、发起请求和输出结果的位置</li>
+                            </ul>
+                            <div class="stage-deliver"><strong>验收时能指出：</strong>模型运行在哪里，请求发到哪里，以及修改问题后输出发生了什么变化。</div>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <div class="stage-no"><span>步骤</span><strong>2</strong></div>
+                        <div class="stage-body">
+                            <h3>切换到云端模型，观察时间工具</h3>
+                            <a class="file-link" href="https://github.com/HXIAO6/miniAgent/blob/main/src/ds.py" target="_blank" rel="noreferrer">src/ds.py ↗</a>
+                            <p>它接入云端模型、注册时间工具，并流式输出回答。这个版本使用固定问题，还没有终端多轮输入。</p>
+                            <ul>
+                                <li>配置自己的服务地址与密钥，核对服务商提供的模型名称</li>
+                                <li>运行时间查询示例，记录 Python 工具实际执行的证据，例如工具内的调试输出</li>
+                                <li>用自己的话画出或写出流程：问题 → 模型提出调用 → Python 执行 → 返回工具结果 → 模型回答</li>
+                            </ul>
+                            <div class="stage-deliver"><strong>验收不只看回答是否出现时间</strong>，还要能确认工具确实运行过。</div>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <div class="stage-no"><span>步骤</span><strong>3</strong></div>
+                        <div class="stage-body">
+                            <h3>自己修改一个工具</h3>
+                            <p>增加一个简单工具，或把已有工具改成带参数的版本。例如：输入科目和学习时长，按你写的固定规则返回学习安排。工具规则由 Python 明确实现，便于对照输出是否符合预期。</p>
+                            <p>准备好三组问题：</p>
+                            <div class="table-wrap" style="margin-bottom:10px;">
+                                <table>
+                                    <thead><tr><th>问题类型</th><th>观察重点</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>明确需要工具的问题</td><td>模型是否选择工具，参数和返回值是否正确</td></tr>
+                                        <tr><td>不需要工具的普通问题</td><td>模型是否出现多余调用</td></tr>
+                                        <tr><td>缺少参数或表述模糊的问题</td><td>模型是追问、补猜参数，还是调用失败</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="stage-deliver"><strong>不要预设模型每次都会选对。</strong>出现失败同样可以交付，但需要保留记录并解释你观察到的现象。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note">三步完成后，保留可运行代码与三组工具调用记录，再进入下面的阶段 1—4。</div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="stages" aria-labelledby="stages-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Build · 阶段 1—4</p>
+                    <h2 id="stages-title">四个阶段，把终端脚本变成网页助手</h2>
+                    <p>这四个阶段都属于第一个小任务。每个阶段保留能运行的版本和简短记录，可以随时向接应人反馈进度；完成阶段 4 后统一提交第一次交付材料。</p>
+                </div>
+
+                <div class="stage-list">
+                    <div class="stage-card">
+                        <div class="stage-no"><span>阶段</span><strong>1</strong></div>
+                        <div class="stage-body">
+                            <h3>让程序支持连续对话</h3>
+                            <a class="file-link" href="https://github.com/HXIAO6/miniAgent/blob/main/src/ds2.py" target="_blank" rel="noreferrer">src/ds2.py ↗</a>
+                            <p><strong>做什么：</strong>加入终端输入循环，把用户消息和助手回答保存到列表，下一轮继续传给模型。</p>
+                            <ul>
+                                <li>设计一次「先提供信息，再追问」的对话</li>
+                                <li>分别保留历史和清空历史，比较两次回答</li>
+                                <li>退出程序再启动，观察内存中的记录是否还在</li>
+                            </ul>
+                            <div class="stage-deliver"><strong>交付与验收：</strong>提交多轮对话代码和两组对照记录，解释为什么这时的记忆无法跨进程保存。</div>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <div class="stage-no"><span>阶段</span><strong>2</strong></div>
+                        <div class="stage-body">
+                            <h3>扩展工具，并观察调用约束</h3>
+                            <a class="file-link" href="https://github.com/HXIAO6/miniAgent/blob/main/src/ds3.py" target="_blank" rel="noreferrer">src/ds3.py ↗</a>
+                            <a class="file-link" href="https://github.com/HXIAO6/miniAgent/blob/main/src/ds4.py" target="_blank" rel="noreferrer">src/ds4.py ↗</a>
+                            <p><strong>做什么：</strong>学习联网搜索、文件读写和调用过程展示，比较自动选择工具与强制调用工具的行为。</p>
+                            <ul>
+                                <li>在专门的测试目录中完成一次文件读取和写入；有 Tavily Key 时再试联网搜索</li>
+                                <li>用相同的普通问题和工具问题，比较开启、关闭 <code>tool_choice="required"</code> 后的结果</li>
+                            </ul>
+                            <div class="stage-deliver"><strong>交付与验收：</strong>提交至少三组对照记录，说明强制调用是否带来多余操作，并指出早期路径检查的局限。未配置搜索服务时，说明跳过部分及原因。</div>
+                            <div class="note warn" style="margin-top:10px;">
+                                <strong>注意：</strong>旧版文件工具可能覆盖文件，<code>ds3.py</code> 没有目录限制，<code>ds4.py</code> 的路径检查也不构成完整隔离。实验只使用可覆盖的测试文件。
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <div class="stage-no"><span>阶段</span><strong>3</strong></div>
+                        <div class="stage-body">
+                            <h3>保存历史，压缩较早的对话</h3>
+                            <a class="file-link" href="https://github.com/HXIAO6/miniAgent/blob/main/src/ds5.py" target="_blank" rel="noreferrer">src/ds5.py ↗</a>
+                            <p><strong>做什么：</strong>用 JSON 保存聊天历史，重新启动后读取；对较早的消息生成摘要，保留近期原文。</p>
+                            <ul>
+                                <li>验证重启后能否继续对话</li>
+                                <li>让上下文达到压缩条件，比较压缩前后保留的信息</li>
+                                <li>尝试清空历史</li>
+                            </ul>
+                            <div class="stage-deliver"><strong>交付与验收：</strong>提交脱敏的历史样例、一组摘要前后对照，并指出至少一个摘要保留的信息和一个可能丢失的细节。能解释「存盘」和「发给模型的上下文」有什么区别。</div>
+                            <div class="note" style="margin-top:10px;">该示例<strong>超过 12 条消息时压缩，保留最近 4 条原文</strong>；「消息条数」与「对话轮数」需要区分。</div>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <div class="stage-no"><span>阶段</span><strong>4</strong></div>
+                        <div class="stage-body">
+                            <h3>做一个能操作的网页界面</h3>
+                            <a class="file-link" href="https://github.com/HXIAO6/miniAgent/blob/main/src/ds6.py" target="_blank" rel="noreferrer">src/ds6.py ↗</a>
+                            <p><strong>做什么：</strong>用 Gradio 替代终端交互，显示流式回答、历史和清空入口。</p>
+                            <ul>
+                                <li>在浏览器中完成输入、连续提问和清空操作</li>
+                                <li>说明页面显示的内容与下一轮发送给模型的内容分别是什么</li>
+                                <li>服务没有返回过程事件时如实记录，不要求额外生成「思考过程」</li>
+                            </ul>
+                            <div class="stage-deliver"><strong>交付与验收：</strong>提交运行步骤、页面截图或简短演示，能够演示多轮对话和清空。说明 <code>ds5.py</code>、<code>ds6.py</code> 共用历史文件时可能产生的影响。</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="delivery" aria-labelledby="delivery-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Deliver · 第一次交付</p>
+                    <h2 id="delivery-title">四份材料，一次说清楚</h2>
+                    <p>验收以能运行、能解释、能复现为准，不要求复杂界面美化。只运行原始示例、没有自己的工具修改和对照记录，不算完成全部要求。</p>
+                </div>
+
+                <div class="mini-grid two">
+                    <div class="panel">
+                        <h4>1 · 可运行的网页助手</h4>
+                        <ul>
+                            <li>提交 Git 分支、仓库链接或代码压缩包，标明自己的修改</li>
+                            <li>最终版本包含至少一个自己修改或新增的工具</li>
+                            <li>支持多轮对话、JSON 历史保存、上下文压缩、Gradio 流式输出和清空历史</li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h4>2 · 阶段实验记录</h4>
+                        <ul>
+                            <li>起步练习的三组工具调用记录</li>
+                            <li>阶段 1—4 要求的历史对照、调用约束对照、摘要前后对照和网页操作记录</li>
+                            <li>说明至少一个遇到的问题及处理过程</li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h4>3 · 简短演示</h4>
+                        <ul>
+                            <li>展示网页启动、连续提问、工具调用</li>
+                            <li>展示重启后恢复历史和清空操作</li>
+                            <li>压缩过程可用此前保存的实验记录说明</li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h4>4 · 部署与实验说明</h4>
+                        <ul>
+                            <li>写清 Python 与依赖、云端模型部署及接口配置、运行命令、功能范围</li>
+                            <li>说明模型、工具、历史、摘要和界面之间的数据流</li>
+                            <li>附不含真实密钥的配置模板</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">4.1</span>交付前自查</h3>
+                    <div class="check-list">
+                        <label class="check-item"><input type="checkbox" data-check><span>最终版本里<strong>至少有一个自己修改或新增的工具</strong>，不是原样跑的示例</span></label>
+                        <label class="check-item"><input type="checkbox" data-check><span>网页能<strong>多轮连续提问</strong>，回答是流式输出</span></label>
+                        <label class="check-item"><input type="checkbox" data-check><span>历史用 JSON 保存，<strong>重启程序后还能接着聊</strong></span></label>
+                        <label class="check-item"><input type="checkbox" data-check><span>上下文达到条件时会<strong>压缩较早消息</strong>，且近期原文还在</span></label>
+                        <label class="check-item"><input type="checkbox" data-check><span>页面上有<strong>清空历史</strong>入口，并演示过一次</span></label>
+                        <label class="check-item"><input type="checkbox" data-check><span>部署说明附了<strong>不含真实密钥</strong>的配置模板</span></label>
+                    </div>
+                    <div class="progress-wrap">
+                        <span id="check-count">0 / 6</span>
+                        <span class="progress-bar"><span class="progress-fill" id="check-progress"></span></span>
+                    </div>
+                </div>
+
+                <div class="note warn">
+                    <strong>两条底线：</strong>交付材料中不要包含真实密钥或完整 <code>.env</code>；实验使用自编示例和可覆盖的测试文件。密钥先脱敏再发给接应人。
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="optional" aria-labelledby="optional-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Optional · 阶段 5—7</p>
+                    <h2 id="optional-title">做完网页助手，再谈知识库和存储</h2>
+                    <p>以下内容不属于第一次交付。完成网页助手后，再与接应人约定是否继续知识库、检索和存储任务。</p>
+                </div>
+
+                <div class="mini-grid">
+                    <div class="panel">
+                        <h4>阶段 5 · 小型文档知识库</h4>
+                        <ul>
+                            <li>自编三份短资料，包含容易核对的事实，例如课程安排或虚构设备说明</li>
+                            <li>准备三类问题：资料中有答案、没有答案、只有部分答案</li>
+                            <li>先体验当前应用，再围绕导入和检索过程补充注释或做一项小修改</li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h4>阶段 6 · 三种检索方式对比</h4>
+                        <ul>
+                            <li>在问题中加入精确型号或编号、语义改写和无关问题</li>
+                            <li>保持资料、分块和参考片段上限一致，比较 BM25、向量与混合检索</li>
+                            <li>再比较重排开关或阈值变化，记录候选片段与耗时</li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h4>阶段 7 · 存储与文档管理</h4>
+                        <ul>
+                            <li>在独立测试副本中验证重启恢复、清空历史、重复导入、同名更新和删除</li>
+                            <li>阅读 SQLite 存储代码，说明完整历史与模型上下文的区别</li>
+                            <li>需要验证迁移时，使用测试用的旧版 <code>sessions/knowledge_history.json</code> 并保留原始副本</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="repo-row">
+                    <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent/blob/main/src/knowledge_assistant.py" target="_blank" rel="noreferrer">knowledge_assistant.py</a>
+                    <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent/blob/main/src/ingest.py" target="_blank" rel="noreferrer">ingest.py</a>
+                    <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent/blob/main/src/rag.py" target="_blank" rel="noreferrer">rag.py</a>
+                    <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent/blob/main/src/rerank.py" target="_blank" rel="noreferrer">rerank.py</a>
+                    <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent/blob/main/src/memory_store.py" target="_blank" rel="noreferrer">memory_store.py</a>
+                    <a class="resource-btn" href="https://github.com/HXIAO6/miniAgent/tree/main/tests" target="_blank" rel="noreferrer">tests/ ↗</a>
+                </div>
+
+                <div class="block">
+                    <h3 class="block-title"><span class="idx">5.1</span>两个压缩参数不要混</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>位置</th><th>触发条件</th><th>保留近期原文</th></tr></thead>
+                            <tbody>
+                                <tr><td>早期示例 <code>ds5.py</code></td><td>超过 12 条消息</td><td>最近 4 条</td></tr>
+                                <tr><td>当前应用</td><td>超过 30 条上下文消息</td><td>最近 8 条</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="note">参数不同，也不代表已经实现长期记忆：压缩只是把较早的对话换成摘要，历史文件里仍然保留完整记录。</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="contact" aria-labelledby="contact-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Contact · 接应与联系</p>
+                    <h2 id="contact-title">卡住的时候，把已经做到的部分发过来</h2>
+                    <p>不用等全部做完再联系。带上运行命令、完整报错和自己试过的方法，能省下很多来回。</p>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-main">
+                        <h3>接应人：韩霄</h3>
+                        <p>负责确认首次任务范围、查看网页助手、阶段记录和演示，再约定是否继续阶段 5—7。</p>
+                        <a class="button button-primary" href="mailto:hx2506642408@163.com">发邮件给接应人</a>
+                        <div class="contact-line" style="margin-top:12px;"><span>邮箱</span><a class="mail-link" href="mailto:hx2506642408@163.com">hx2506642408@163.com</a></div>
+                        <div class="contact-line"><span>开始前对接</span><span>确认 Python 基础、电脑环境和首次任务范围；云端模型由参与者自行部署</span></div>
+                        <div class="contact-line"><span>遇到困难时</span><span>发来已做到的步骤、运行命令、完整报错和自己尝试过的方法；密钥先脱敏</span></div>
+                        <div class="contact-line"><span>第一次交付后</span><span>由接应人查看网页助手、阶段记录和演示，再约定后续阶段</span></div>
+                    </div>
+                    <div class="panel">
+                        <h4>首次联系可以这样说</h4>
+                        <div class="quote-box" style="margin-top:0;">
+                            我想参加「从零构建智能体」任务，目前会……，使用的系统是……。我计划完成到阶段 4，做出带工具和记忆的网页助手，希望确认环境准备、进度和交付方式。
+                        </div>
+                        <p style="margin:12px 0 0;color:var(--muted);font-size:0.84rem;">项目代码和阅读材料见 <a class="mail-link" href="https://github.com/HXIAO6/miniAgent" target="_blank" rel="noreferrer">GitHub 仓库</a>。Issues 可以记录公开的技术问题；个人信息、真实密钥和私有资料请通过接应人确认的私下渠道沟通。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section-white" id="next" aria-labelledby="next-title">
+            <div class="shell">
+                <div class="section-heading">
+                    <p class="section-kicker">Next · 进阶方向</p>
+                    <h2 id="next-title">做完基础构建之后，还可以往哪里走</h2>
+                    <p>以下方向不属于第一次交付要求。部分能力已有初步实现，仍需要系统验证和改进。</p>
+                </div>
+
+                <div class="mini-grid">
+                    <div class="panel">
+                        <h4>1 · 安全相关的测试与思考</h4>
+                        <ul>
+                            <li>文档或工具返回内容里夹带指令时，模型会不会把资料当成命令</li>
+                            <li>混入错误资料后，检索、回答与引用会受到什么影响</li>
+                            <li>文件路径限制能否阻止越界访问；写入、覆盖或删除是否需要执行前确认</li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h4>2 · 优化结构，进一步解耦</h4>
+                        <ul>
+                            <li>继续分离网页交互、对话编排与业务逻辑，明确模块的输入输出</li>
+                            <li>只选一处耦合，例如把聊天处理逻辑从界面回调里提出来</li>
+                            <li>画出修改前后的依赖关系，并证明原有功能仍能运行</li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h4>3 · 迁移到 LangChain</h4>
+                        <ul>
+                            <li>先迁移一条最小流程，再逐步覆盖记忆和引用</li>
+                            <li>保留原实现作对照，用相同问题与资料检查结果</li>
+                            <li>记录框架在接口、状态管理和调试方式上的差异</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>安全小实验的做法：</strong>先选一个问题，用隔离目录、自编资料和模拟工具做正常输入与异常输入的对照，记录预期行为、实际行为、失败位置和改进建议，再用相同样例复测。现有删除确认和路径检查可以作为起点，<strong>不应直接视为完整安全方案</strong>。迁移框架时也不预设迁移后效果一定更好。
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="shell footer-inner">
+            <div>本页是任务说明，页面本身不含可运行的助手；代码与示例在参考仓库中。</div>
+            <div>任务整理：韩霄 · <a class="mail-link" href="mailto:hx2506642408@163.com">hx2506642408@163.com</a> · 返回 <a class="mail-link" href="../../agentlab/">AgentLab</a></div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var checks = document.querySelectorAll('[data-check]');
+            var fill = document.getElementById('check-progress');
+            var count = document.getElementById('check-count');
+            if (!checks.length || !fill || !count) return;
+
+            function update() {
+                var done = 0;
+                checks.forEach(function (item) { if (item.checked) done += 1; });
+                count.textContent = done + ' / ' + checks.length;
+                fill.style.width = (done / checks.length * 100) + '%';
+            }
+
+            checks.forEach(function (item) { item.addEventListener('change', update); });
+            update();
+        }());
+    </script>
+</body>
+</html>
